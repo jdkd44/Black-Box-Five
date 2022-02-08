@@ -1,0 +1,7 @@
+
+*.code-workspace
+*.pyc
+*.log
+test.py
+temp.py
+temp/

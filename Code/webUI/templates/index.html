@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{{ url_for('static', filename= 'css/style.css') }}">
+    <script src="static/javascript/chart.js"></script>
+    <title>Black Box Web GUI</title>
+</head>
+<body style="height:auto;">
+    <table class="wrap">
+        <tbody>
+        <tr class="header">
+            <td class="left"> <!-- blank cell for formatting --></td>
+            <td class="center">Black Box Five Web UI</td>
+            <td class="right">battery information</td>
+        </tr>
+        <tr class="main">
+            <td class="left">
+                current data here along with buttons for   <br>
+                start/stop recording, sampling rate, maybe more?
+                
+            </td>
+            <td class="center">
+                <canvas id="vel_chart" width="400" height="400"></canvas>
+            </td>
+            <td class="right">
+                <canvas id="acc_chart" width="400" height="400"></canvas>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="3" class="footer">
+                Black Box Five <br>
+                John DeRuntz | Kevin Neiheisel | Justin Palermo | Anthony Allen
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</html>

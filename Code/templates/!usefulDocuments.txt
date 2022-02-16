@@ -1,0 +1,5 @@
+Dynamically updating data probably done through intercoolerjs
+https://intercoolerjs.org/attributes/ic-poll.html
+
+passing variables from flask to webpage
+https://www.educba.com/flask-jsonify/

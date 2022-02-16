@@ -1,13 +1,17 @@
-from flask import Flask, render_template, request
-import sqlite3
+from flask import Flask, render_template, jsonify
+from databaseInteract import logData
+from sensorRead import dbData
+import datetime
 import time
 
+
 #variables
-dbName = 'BlackBox.db'
 webUI = True            #default webUI on
+dataLogging = False     #default dataLogging off
 sampleFrequency = 0.5   #default to 0.5sec, allow updates via webpage
+webPort = 80            #port 80 for http requests
 
-
+#flask app intiation
 app = Flask(__name__)
 
 #main webpage
@@ -15,50 +19,28 @@ app = Flask(__name__)
 def index():
     return render_template("index.html")
 
-#gather sensor data
-def getSensData():
-    #get that data
-    return lateral_acc, vertical_acc, vel, height
+@app.route('/data')
+def data():         #datastream for logging data using intercooler.js
+    lateral_acc, vertical_acc, vel, height = dbData()
+    return jsonify(
+        lateral_acc = lateral_acc,
+        vertical_acc = vertical_acc,
+        velocity = vel,
+        height = height
+        )
 
-#completely wipe database
-def clearDatabase():
-    connection = sqlite3.connect(dbName)                        #connect to database
-    cur = connection.cursor()                                   #create cursor to move through database
-    with open('dbclear.sql') as f:                              #open database format file
-        connection.executescript(f.read())                      #create database tables if not existing
-    connection.commit()                                         #commit database changes
-    connection.close()                                          #close database connection
-
-#write sensor data into database                                #WHILE DATABASE OPEN, READ CONTENTS AND PASS INTO WEBPAGE IF WEBSERVER RUNNING
-def logData(lateral_acc, vertical_acc, vel, height):
-    currentTime = datetime('now')                               #get current time
-    connection = sqlite3.connect(dbName)                        #connect to database
-    cur = connection.cursor()                                   #create cursor to move through database
-    with open('schema.sql') as f:                               #open database format file
-        connection.executescript(f.read())                      #create database tables if not existing
-
-    if webUI:
-        #get database history and pass into webpage for chart updates
-    
-    #data logging
-    cur.execute("INSERT INTO acc_data (time, lateral_acc, vertical_acc) VALUES (?, ?, ?)",(lateral_acc, vertical_acc))
-    cur.execute("INSERT INTO vel_data (time, vel) VALUES (?, ?)",(vel))    
-    cur.execute("INSERT INTO alt_data (time, height) VALUES (?, ?)",(height))    
-
-    connection.commit()                                         #commit database changes
-    connection.close()                                          #close database connection
-
-#if webUI, start webserver
+#if webUI true, start webserver
 if webUI:
-    app.run(debug=True, port=80)
+    app.run(debug=True, port=webPort)
 
-                                                                #NEEDS LOGIC TO STOP RUNNING WHEN CONDITIONS ARE MET
-                                                                #NEEDS LOGIC TO CHOOSE TO CLEAR DATABASE
-                                                                #NEEDS LOGIC TO SHUTDOWN WEBSITE
-                                                                #NEEDS OLED SCREEN CONTROL TO DISPLAY WEBPAGE/RECORDING STATUS
+                                                                    #NEEDS LOGIC TO STOP RUNNING WHEN CONDITIONS ARE MET
+                                                                    #NEEDS LOGIC TO CHOOSE TO CLEAR DATABASE
+                                                                    #NEEDS LOGIC TO SHUTDOWN WEBSITE
+                                                                    #NEEDS OLED SCREEN CONTROL TO DISPLAY WEBPAGE/RECORDING STATUS
 
-logData = False
-while(logData):                                                 #main program loop
-    lateral_acc, vertical_acc, vel, height = getSensData()      #get sensor data
-    logData(lateral_acc, vertical_acc, vel, height)             #log data
-    time.sleep(sampleFrequency)                                 #wait for specified amount of time
+
+while(dataLogging):                                                 #if dataLogging true, record sensor data
+    lateral_acc, vertical_acc, vel, height = sensorRead.dbData() #get sensor data
+    currentTime = datetime.datetime.now()
+    logData(currentTime.strftime("%Y-%m-%d %H:%M:%S.%L"), lateral_acc, vertical_acc, vel, height)             #log data
+    time.sleep(sampleFrequency)                                     #wait for specified amount of time

@@ -40,7 +40,7 @@ if webUI:
 
 
 while(dataLogging):                                                 #if dataLogging true, record sensor data
-    lateral_acc, vertical_acc, vel, height = sensorRead.dbData() #get sensor data
+    lateral_acc, vertical_acc, vel, height = dbData()               #get sensor data
     currentTime = datetime.datetime.now()
     logData(currentTime.strftime("%Y-%m-%d %H:%M:%S.%L"), lateral_acc, vertical_acc, vel, height)             #log data
     time.sleep(sampleFrequency)                                     #wait for specified amount of time

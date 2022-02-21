@@ -1,5 +1,7 @@
 import sqlite3
 import csv
+
+
 #database options
 dbName = 'BlackBox.db'
 dbFolder = 'database/'
@@ -11,15 +13,17 @@ exportPath = ''
 
 #clear database
 def clearDatabase():
+
+    remove_table = "DROP TABLE IF EXISTS sensor_data"           #SQLite statement to remove the existing table and it's data
+
     connection = sqlite3.connect(dbFolder + dbName)             #connect to database
     cur = connection.cursor()                                   #create cursor to move through database
-    with open(dbFolder + 'dbclear.sql') as f:                   #open database format file
-        connection.executescript(f.read())                      #create database tables if not existing
+    cur.execute(remove_table)                                   #remove table
     connection.commit()                                         #commit database changes
     connection.close()                                          #close database connection
-    
+
 #write data to database
-def logData(currentTime, lateral_acc, vertical_acc, vel, height):
+def writeDB(currentTime, lateral_acc, vertical_acc, vel, height):
     connection = sqlite3.connect(dbFolder + dbName)             #connect to database
     cur = connection.cursor()                                   #create cursor to move through database
     with open(dbFolder + 'schema.sql') as f:                    #open database format file
@@ -32,9 +36,27 @@ def logData(currentTime, lateral_acc, vertical_acc, vel, height):
     connection.close()                                          #close database connection
 
 #read data from database
-#def readData(entries):
-#
-#   return
+def readDB(entries = 20):
+    connection = sqlite3.connect(dbFolder + dbName)             #connect to database
+    cur = connection.cursor()                                   #create cursor to move through database
+    exportScript = \
+        "SELECT entry_time, lateral_acceleration, vertical_acceleration, velocity, height FROM \
+         ( SELECT entry_time, lateral_acceleration, vertical_acceleration, velocity, height FROM sensor_data \
+         ORDER BY entry_time DESC LIMIT " + str(entries) +") \
+         ORDER BY entry_time ASC"
+    cur.execute(exportScript)                                   #run the export script
+    records = cur.fetchall()                                    #get export results
+    
+    time = [None for i in range(entries)]
+    lateral_acc = [None for i in range(entries)]
+    vertical_acc = [None for i in range(entries)]
+    vel = [None for i in range(entries)]
+    height = [None for i in range(entries)]
+
+    for entry, row in enumerate(records):
+        time[entry], lateral_acc[entry], vertical_acc[entry], vel[entry], height[entry] = row
+
+    return time, lateral_acc, vertical_acc, vel, height
 
 #export database to csv file
 def exportDB():

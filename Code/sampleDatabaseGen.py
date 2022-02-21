@@ -1,5 +1,5 @@
 import random
-from databaseInteract import clearDatabase, logData
+from databaseInteract import clearDatabase, writeDB
 
 #Generates new random data points and inserts into database
 #Wipes all current database entries
@@ -14,4 +14,4 @@ for i in range(dataPoints):
     vertical_acc = random.randint(dataMin, dataMax)
     vel = random.randint(dataMin, dataMax)
     height = random.randint(dataMin, dataMax)
-    logData("0000-00-00 00:00:00."+str(i).zfill(3), lateral_acc, vertical_acc, vel, height)
+    writeDB("0000-00-00 00:00:00."+str(i).zfill(3), lateral_acc, vertical_acc, vel, height)

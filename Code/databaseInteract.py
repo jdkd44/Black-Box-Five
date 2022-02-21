@@ -44,7 +44,8 @@ def readDB(entries = 20):
          ( SELECT entry_time, lateral_acceleration, vertical_acceleration, velocity, height FROM sensor_data \
          ORDER BY entry_time DESC LIMIT " + str(entries) +") \
          ORDER BY entry_time ASC"
-    cur.execute(readScript)                                     #run the export script
+    cur.execute(readScript)
+    connection.close()                                      #run the export script
     return cur.fetchall()                                       #get and return export results
 
 #export database to csv file
@@ -58,6 +59,7 @@ def exportDB():
          ORDER BY entry_time"
     cur.execute(exportScript)                                   #run the export script
     results = cur.fetchall()                                    #get export results
+    connection.close() 
     headers = [i[0] for i in cur.description]                   #get table headers
 
 

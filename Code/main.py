@@ -15,8 +15,10 @@ webPort = 80                        #port 80 for http requests
 app = Flask(__name__)
 
 #main webpage
-@app.route('/')
+@app.route('/', methods = ['POST', 'GET'])
 def index():
+    # if request.method == 'POST':
+    #     #get values from options panel
     return render_template("index.html")
 
 @app.route('/data')         #json for current data
@@ -31,14 +33,7 @@ def data():
 
 @app.route('/chart')        #json for past database entries
 def chart():
-    time, lateral_acc, vertical_acc, vel, height = readDB(1)
-    return jsonify(
-        time = time,
-        lateral_acceleration = lateral_acc,
-        vertical_acceleration = vertical_acc,
-        velocity = vel,
-        height = height
-    )
+    return jsonify(readDB())
 
 #log data function
 def logData():

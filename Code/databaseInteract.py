@@ -47,15 +47,14 @@ def readDB(entries = 20):
     cur.execute(exportScript)                                   #run the export script
     records = cur.fetchall()                                    #get export results
     
-    time = [None for i in range(entries)]
-    lateral_acc = [None for i in range(entries)]
-    vertical_acc = [None for i in range(entries)]
-    vel = [None for i in range(entries)]
-    height = [None for i in range(entries)]
+    time, lateral_acc, vertical_acc, vel, height = [], [], [], [], []
 
     for entry, row in enumerate(records):
-        time[entry], lateral_acc[entry], vertical_acc[entry], vel[entry], height[entry] = row
-
+        time.append(row[0])
+        lateral_acc.append(row[1])
+        vertical_acc.append(row[2])
+        vel.append(row[3])
+        height.append(row[4])
     return time, lateral_acc, vertical_acc, vel, height
 
 #export database to csv file

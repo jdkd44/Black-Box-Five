@@ -1,6 +1,6 @@
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, url_for, request
 from databaseInteract import writeDB, readDB
-from sensorRead import dbData
+from sensorRead import dbData, batteryInfo
 import datetime
 
 
@@ -31,7 +31,7 @@ def data():
 
 @app.route('/chart')        #json for past database entries
 def chart():
-    time, lateral_acc, vertical_acc, vel, height = readDB(1000)
+    time, lateral_acc, vertical_acc, vel, height = readDB(1)
     return jsonify(
         time = time,
         lateral_acceleration = lateral_acc,

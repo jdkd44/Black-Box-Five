@@ -4,55 +4,54 @@ Website Color Palette: https://colorhunt.co/palette/1919192d4263c84b31ecdbba
 
 */
 
-*{
+* {
+    box-sizing: border-box;
     background-color: #191919;
     color: #ECDBBA;
-    margin:0;
 }
 
-.wrap {
-    width: 100%;
-    height: 800px;
-    margin: 0px;
-    padding: 5px 5px;
-    overflow: auto;
-}
-.header {
-    height: 10%;
-}
-.header .left {
-    width: 20%;
-}
-.header .center {
-    width: 60%;
-    text-align: center;
-    margin: auto;
-    font-weight: bold;
-    font-size: 36px;
-    padding: 10px;
-}
-.header .right {
-    width: 20%;
-}
-.main {
-    height: 80%;
-}
-.main .left {
-    width: 33%;
-    float: left;
-}
-.main .center {
-    width: 34%;
-}
-.main .right {
-    width: 33%;
-    float: right;
-}
-.footer {
-    height: 10%;
-    text-align: center;
-    margin: auto;
-    font-weight: bold;
-    font-size: 18px;
+body {
+    margin: 0;
+    padding: 0;
 }
 
+a[x-apple-data-detectors] {
+    color: inherit !important;
+    text-decoration: inherit !important;
+}
+
+#MessageViewBody a {
+    color: inherit;
+    text-decoration: none;
+}
+
+p {
+    line-height: inherit
+}
+
+.chart {
+    height: 225px;
+}
+
+@media (max-width:920px) {
+    .icons-inner {
+        text-align: center;
+    }
+
+    .icons-inner td {
+        margin: 0 auto;
+    }
+
+    .row-content {
+        width: 100% !important;
+    }
+
+    .column .border {
+        display: none;
+    }
+
+    .stack .column {
+        width: 100%;
+        display: block;
+    }
+}

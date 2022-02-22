@@ -39,14 +39,24 @@ def writeDB(currentTime, lateral_acc, vertical_acc, vel, height):
 def readDB(entries = 20):
     connection = sqlite3.connect(dbFolder + dbName)             #connect to database
     cur = connection.cursor()                                   #create cursor to move through database
-    readScript = \
+    exportScript = \
         "SELECT entry_time, lateral_acceleration, vertical_acceleration, velocity, height FROM \
          ( SELECT entry_time, lateral_acceleration, vertical_acceleration, velocity, height FROM sensor_data \
          ORDER BY entry_time DESC LIMIT " + str(entries) +") \
          ORDER BY entry_time ASC"
-    cur.execute(readScript)
-    connection.close()                                      #run the export script
-    return cur.fetchall()                                       #get and return export results
+    cur.execute(exportScript)                                   #run the export script
+    records = cur.fetchall()                                    #get export results
+
+    time = [None for i in range(entries)]
+    lateral_acc = [None for i in range(entries)]
+    vertical_acc = [None for i in range(entries)]
+    vel = [None for i in range(entries)]
+    height = [None for i in range(entries)]
+
+    for entry, row in enumerate(records):                       #seperate everything into individual sections
+        time[entry], lateral_acc[entry], vertical_acc[entry], vel[entry], height[entry] = row
+
+    return time, lateral_acc, vertical_acc, vel, height         #return results
 
 #export database to csv file
 def exportDB():
@@ -59,7 +69,6 @@ def exportDB():
          ORDER BY entry_time"
     cur.execute(exportScript)                                   #run the export script
     results = cur.fetchall()                                    #get export results
-    connection.close() 
     headers = [i[0] for i in cur.description]                   #get table headers
 
 

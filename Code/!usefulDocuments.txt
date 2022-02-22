@@ -3,3 +3,6 @@ https://intercoolerjs.org/attributes/ic-poll.html
 
 passing variables from flask to webpage
 https://www.educba.com/flask-jsonify/
+
+json data in chartjs
+https://stackoverflow.com/questions/44990517/displaying-json-data-in-chartjs

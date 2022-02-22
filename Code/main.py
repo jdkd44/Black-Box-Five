@@ -33,7 +33,14 @@ def data():
 
 @app.route('/chart')        #json for past database entries
 def chart():
-    return jsonify(jsondata = readDB())
+    time, lateral_acc, vertical_acc, vel, height = readDB()
+    return jsonify(
+        time = time,
+        lateral_acc = lateral_acc,
+        vertical_acc = vertical_acc,
+        velocity = vel,
+        height = height
+    )
 
 #log data function
 def logData():

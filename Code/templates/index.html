@@ -7,6 +7,8 @@
 <!-- define css and javascript files -->
 <link rel="stylesheet" href="{{ url_for('static', filename= 'css/style.css') }}">
 <script src="{{ url_for('static', filename = 'javascript/chart.js') }}"></script>
+<script src="{{ url_for('static', filename = 'javascript/jquery.canvasjs.min.js') }}"></script>
+<script src="{{ url_for('static', filename = 'javascript/canvasjs.min.js') }}"></script>
 <script src="{{ url_for('static', filename = 'javascript/main.js') }}"></script>
 
 </head>
@@ -108,10 +110,10 @@ live data div
 <table border="0" cellpadding="0" cellspacing="0" class="html_block" role="presentation" width="100%">
 <tr>
 <td style="padding-top:10px;padding-bottom:10px;">
-<div align="center" style="font-family:Arial, Helvetica Neue, Helvetica, sans-serif;text-align:center;"><div class="chart">
-
-  <!-- VEL CHART DIV -->
-  <chart id="vel_chart"></chart>
+<div align="center" style="font-family:Arial, Helvetica Neue, Helvetica, sans-serif;text-align:center;"><div id = "vel_chart">
+<!-- 
+  VEL CHART DIV
+  <canvas id="vel_chart"></canvas> -->
 
 </div></div>
 </td>
@@ -122,10 +124,10 @@ live data div
 <table border="0" cellpadding="0" cellspacing="0" class="html_block" role="presentation" width="100%">
 <tr>
 <td style="padding-top:10px;padding-bottom:10px;">
-  <div align="center" style="font-family:Arial, Helvetica Neue, Helvetica, sans-serif;text-align:center;"><div class="chart">
+  <div align="center" style="font-family:Arial, Helvetica Neue, Helvetica, sans-serif;text-align:center;"><div class="chartContainer">
 
     <!-- LATERAL ACCELERATION CHART DIV -->
-    <chart id="lat_acc_chart"></chart>
+    <canvas id="lat_acc_chart"></canvas>
   
   </div></div>
 </td>
@@ -136,10 +138,10 @@ live data div
 <table border="0" cellpadding="0" cellspacing="0" class="html_block" role="presentation" width="100%">
 <tr>
 <td style="padding-top:10px;padding-bottom:10px;">
-  <div align="center" style="font-family:Arial, Helvetica Neue, Helvetica, sans-serif;text-align:center;"><div class="chart">
+  <div align="center" style="font-family:Arial, Helvetica Neue, Helvetica, sans-serif;text-align:center;"><div class="chartContainer">
 
     <!-- VERTICAL ACCERLERATION CHART DIV -->
-    <chart id="vert_acc_chart"></chart>
+    <canvas id="vert_acc_chart"></canvas>
   
   </div></div>
 </td>
@@ -150,10 +152,10 @@ live data div
 <table border="0" cellpadding="0" cellspacing="0" class="html_block" role="presentation" width="100%">
 <tr>
 <td style="padding-top:10px;padding-bottom:10px;">
-  <div align="center" style="font-family:Arial, Helvetica Neue, Helvetica, sans-serif;text-align:center;"><div class="chart">
+  <div align="center" style="font-family:Arial, Helvetica Neue, Helvetica, sans-serif;text-align:center;"><div class="chartContainer">
 
     <!-- HEIGHT CHART DIV -->
-    <chart id="height_chart"></chart>
+    <canvas id="height_chart"></canvas>
   
   </div></div>
 </td>

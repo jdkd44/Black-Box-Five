@@ -1,5 +1,6 @@
 import random
 from databaseInteract import clearDatabase, writeDB
+from sensorRead import dbData
 
 #Generates new random data points and inserts into database
 #Wipes all current database entries
@@ -10,8 +11,5 @@ dataMin = -3
 
 clearDatabase()
 for i in range(dataPoints):
-    lateral_acc = random.randint(dataMin, dataMax)
-    vertical_acc = random.randint(dataMin, dataMax)
-    vel = random.randint(dataMin, dataMax)
-    height = random.randint(dataMin, dataMax)
-    writeDB("0000-00-00 00:00:00."+str(i).zfill(3), lateral_acc, vertical_acc, vel, height)
+    lateral_acc, vertical_acc, vel, height = dbData()
+    writeDB("2022-03-01 01:02:03."+str(i).zfill(3), lateral_acc, vertical_acc, vel, height)

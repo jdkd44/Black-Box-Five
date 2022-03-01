@@ -8,7 +8,7 @@ dbFolder = 'database/'
 
 #export options
 exportFile = 'BlackBox.csv'
-exportPath = ''
+exportPath = 'database/'
 
 
 #clear database

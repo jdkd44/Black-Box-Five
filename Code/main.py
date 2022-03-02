@@ -58,9 +58,9 @@ def download():
     exportDB()
     return send_file(exportPath + exportFile, as_attachment=True)
 
-@app.errorhandler(404)
+@app.errorhandler(404)      #unknown path
 def page_not_found(e):
-    return render_template('index.html'), 404
+    return redirect(url_for('index')), 404
 
 
 def toggleDataLogging():

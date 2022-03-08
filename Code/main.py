@@ -1,3 +1,5 @@
+from asyncore import poll
+from time import time
 from flask import Flask, render_template, jsonify, request, url_for, send_file, redirect
 from databaseInteract import writeDB, readDB, exportDB, exportFile, exportPath
 from sensorRead import dbData, batteryInfo, gpsCoordinates
@@ -6,8 +8,8 @@ import datetime
 
 #variables
 webUI = True                        #default webUI on
-dataLogging = False                 #default dataLogging off
-timeFormat = "%Y-%m-%d %H:%M:%S.%L" #formatting for time for database entries - YYYY-MM-DD HH:MM:SS.sss  
+dataLogging = True                 #default dataLogging off
+timeFormat = "%Y-%m-%d %H:%M:%S.%f" #formatting for time for database entries - YYYY-MM-DD HH:MM:SS.sss  
 pollingRate = 2                     #times per second to poll the sensors, default 2
 webPort = 80                        #port 80 for http requests
 
@@ -30,6 +32,10 @@ def data():
     lateral_acc, vertical_acc, vel, height = dbData()
     gps_lat, gps_lon = gpsCoordinates()
     bat_percent, charge_status = batteryInfo()
+    currentTime = datetime.datetime.now()
+
+    writeDB(currentTime.strftime(timeFormat), lateral_acc, vertical_acc, vel, height)
+    
     return jsonify(
         lateral_acc = lateral_acc,
         vertical_acc = vertical_acc,
@@ -39,7 +45,9 @@ def data():
         gps_lon = gps_lon,
         bat_percent = bat_percent,
         charge_status = charge_status,
-        time = datetime.datetime.now()
+        time = currentTime.strftime(timeFormat),
+        dataLogging = dataLogging,
+        pollingRate = pollingRate
         )
 
 @app.route('/chart')        #json for past database entries

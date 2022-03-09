@@ -1,40 +1,39 @@
-from asyncore import poll
-from time import time
 from flask import Flask, render_template, jsonify, request, url_for, send_file, redirect
-from databaseInteract import writeDB, readDB, exportDB, exportFile, exportPath
+from databaseInteract import writeDB, readDB, exportDB, exportFile, exportPath, clearDatabase
 from sensorRead import dbData, batteryInfo, gpsCoordinates
 import datetime
 
 
 #variables
 webUI = True                        #default webUI on
-dataLogging = True                 #default dataLogging off
+dataLogging = False                 #default dataLogging off
 timeFormat = "%Y-%m-%d %H:%M:%S.%f" #formatting for time for database entries - YYYY-MM-DD HH:MM:SS.sss  
 pollingRate = 2                     #times per second to poll the sensors, default 2
 webPort = 80                        #port 80 for http requests
 
-
 #flask app intiation
 app = Flask(__name__)
 
-#main webpage
-@app.route('/', methods = ['POST', 'GET'])
+#flask stuff
+@app.route('/', methods = ['GET','POST'])  #main webpage
 def index():
-    if not dataLogging: recordingButton = "Start Recording"
-    else: recordingButton = "Stop Recording"
-
     if request.method == 'POST':
-        if request.form['recordButton']: toggleDataLogging()
-    return render_template("index.html", recordingButton=recordingButton, pollingRate=pollingRate)
+        global dataLogging
+        recordingStatus = request.form['recordingStatus'].upper()
+        if recordingStatus == "TRUE":
+            dataLogging = True
+        elif recordingStatus == "FALSE":
+            dataLogging = False
+        else:
+            print("Unexpected Data Returned")
+    return render_template("index.html", pollingRate=pollingRate)
 
-@app.route('/data')         #json for current data
+@app.route('/data')         #get current data and log to database
 def data():         
     lateral_acc, vertical_acc, vel, height = dbData()
     gps_lat, gps_lon = gpsCoordinates()
-    bat_percent, charge_status = batteryInfo()
-    currentTime = datetime.datetime.now()
-
-    writeDB(currentTime.strftime(timeFormat), lateral_acc, vertical_acc, vel, height)
+    currentTime = datetime.datetime.now().strftime(timeFormat)[0:23]
+    #writeDB(currentTime.strftime(timeFormat), lateral_acc, vertical_acc, vel, height)
     
     return jsonify(
         lateral_acc = lateral_acc,
@@ -43,22 +42,22 @@ def data():
         height = height,
         gps_lat = gps_lat,
         gps_lon = gps_lon,
-        bat_percent = bat_percent,
-        charge_status = charge_status,
-        time = currentTime.strftime(timeFormat),
-        dataLogging = dataLogging,
+        time = currentTime,
         pollingRate = pollingRate
         )
 
-@app.route('/chart')        #json for past database entries
-def chart():
-    time, lateral_acc, vertical_acc, vel, height = readDB()
+@app.route('/battery')      #json for battery status
+def battery():
+    bat_percent, charge_status = batteryInfo()
     return jsonify(
-        time = time,
-        lateral_acc = lateral_acc,
-        vertical_acc = vertical_acc,
-        velocity = vel,
-        height = height
+        bat_percent = bat_percent,
+        charge_status = charge_status
+    )
+
+@app.route('/onload_data')  #json for javascript initialization
+def onload_data():
+    return jsonify(
+        recordingStatus = dataLogging
     )
 
 @app.route('/download')     #csv export file download
@@ -66,19 +65,16 @@ def download():
     exportDB()
     return send_file(exportPath + exportFile, as_attachment=True)
 
+@app.route('/cleardb', methods=['POST'])
+def clearDB():
+    if request.method == 'POST':
+        if request.form['clear_confirmation']:
+            clearDatabase()
+    return ('', 204)
+
 @app.errorhandler(404)      #unknown path
 def page_not_found(e):
     return redirect(url_for('index')), 404
-
-
-def toggleDataLogging():
-    dataLogging = not dataLogging
-
-#log data function
-def logData():
-    lateral_acc, vertical_acc, vel, height = dbData()                                   #get sensor data
-    currentTime = datetime.datetime.now()                                               #get current time
-    writeDB(currentTime.strftime(timeFormat), lateral_acc, vertical_acc, vel, height)   #log data
 
 #if webUI true, start webserver
 if webUI:

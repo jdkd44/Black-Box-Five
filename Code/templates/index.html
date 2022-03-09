@@ -2,11 +2,13 @@
 <html lang="en-US">
 <head>
 <title>Black Box Five WebUI</title>
+<!-- browser things and icon -->
 <meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link rel="icon" type="image/icon" href="{{ url_for('static', filename = 'images/favicon.ico') }}">
+
 <!-- define css and javascript files -->
 <link rel="stylesheet" href="{{ url_for('static', filename= 'css/style.css') }}">
-<script src="{{ url_for('static', filename = 'javascript/chart.js') }}"></script>
 <script src="{{ url_for('static', filename = 'javascript/jquery.canvasjs.min.js') }}"></script>
 <script src="{{ url_for('static', filename = 'javascript/canvasjs.min.js') }}"></script>
 <script src="{{ url_for('static', filename = 'javascript/main.js') }}"></script>
@@ -76,9 +78,9 @@
   <form>
   <p> Polling Rate (/s) <input type="text" id="pollingInterval" class="option" value=" {{pollingRate}} "></p>
   <br>
-  <button type="submit" id="recordButton" class="option"> {{ recordingButton }} </button>
+  <button type="button" id="recordButton" class="option" onclick="recordButtonClicked()"> Start Recording </button>
   </form>
-  <button type="button" id="exportButton" onclick="window.location.href='{{ url_for('download') }} '" class="option"> Export Database </button> <!-- Error showing in this line is fake, is just dealing with Flask formatting -->
+  <button type="button" id="exportButton" class="option" onclick="window.location.href='{{ url_for('download') }}'"> Export Database </button> <!-- Error showing in this line is fake, is just dealing with Flask formatting -->
 
 </div></div>
 </td>
@@ -91,7 +93,7 @@
 <td style="padding-top:10px;padding-bottom:10px;">
 <div align="center" style="font-family:Arial, Helvetica Neue, Helvetica, sans-serif;text-align:center;"><div class="livedata">
 
-  <table class="LiveData" style="align-self:center;">
+  <table class="LiveData" align="center">
     <tbody>
     <tr>
     <td>Velociy </td>

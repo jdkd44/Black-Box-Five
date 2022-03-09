@@ -1,84 +1,121 @@
 from flask import Flask, render_template, jsonify, request, url_for, send_file, redirect
-from databaseInteract import writeDB, readDB, exportDB, exportFile, exportPath
-from sensorRead import dbData, batteryInfo, gpsCoordinates
+from flask_apscheduler import APScheduler
 import datetime
+from os import system
+from databaseInteract import writeDB, readDB, exportDB, exportFile, exportPath, clearDatabase
+from sensorRead import dbData, batteryInfo, gpsCoordinates
 
 
-#variables
-webUI = True                        #default webUI on
-dataLogging = False                 #default dataLogging off
-timeFormat = "%Y-%m-%d %H:%M:%S.%L" #formatting for time for database entries - YYYY-MM-DD HH:MM:SS.sss  
-pollingRate = 2                     #times per second to poll the sensors, default 2
-webPort = 80                        #port 80 for http requests
+#global variables and defaults
+dataLogging = False                             #default dataLogging off
+timeFormat = "%Y-%m-%d %H:%M:%S.%f"             #formatting for time for database entries - YYYY-MM-DD HH:MM:SS.sss  
+shutdownScript = "sudo shutdown now"            #script used to turn device off
+pollingRate = 2                                 #times per second to poll the sensors, default 2
+webPort = 80                                    #port 80 for http requests
 
 
-#flask app intiation
-app = Flask(__name__)
+class Config(object):                           #flask scheduler configuration
+    SCHEDULER_API_ENABLED = True
 
-#main webpage
-@app.route('/', methods = ['POST', 'GET'])
-def index():
-    if not dataLogging: recordingButton = "Start Recording"
-    else: recordingButton = "Stop Recording"
-
-    if request.method == 'POST':
-        if request.form['recordButton']: toggleDataLogging()
-    return render_template("index.html", recordingButton=recordingButton, pollingRate=pollingRate)
-
-@app.route('/data')         #json for current data
-def data():         
+def logData():                                  #get data and log it function
     lateral_acc, vertical_acc, vel, height = dbData()
-    gps_lat, gps_lon = gpsCoordinates()
-    bat_percent, charge_status = batteryInfo()
-    return jsonify(
-        lateral_acc = lateral_acc,
-        vertical_acc = vertical_acc,
-        velocity = vel,
-        height = height,
-        gps_lat = gps_lat,
-        gps_lon = gps_lon,
-        bat_percent = bat_percent,
-        charge_status = charge_status,
-        time = datetime.datetime.now()
+    currentTime = datetime.datetime.now().strftime(timeFormat)[0:23]
+    if writeDB(currentTime, lateral_acc, vertical_acc, vel, height):
+        print("Data has been logged")
+    else:
+        print("Error in database logging")
+    
+if __name__ == '__main__':
+    app = Flask(__name__)                       #flask app intiation
+    app.config.from_object(Config())
+
+    @app.route('/', methods = ['GET','POST'])   #main webpage
+    def index():
+        if request.method == 'POST':            #if webpage posts data, get the data
+            global dataLogging
+            global pollingRate
+
+            recordingStatus = request.form['recordingStatus'].upper()
+            webPollingRate = float(request.form['pollingRate'])
+            if webPollingRate != pollingRate:
+                pollingRate = webPollingRate
+                scheduler.remove_job(id='logData')
+                scheduler.add_job(id='logData', func='main:logData', trigger='interval', seconds=(1/webPollingRate), max_instances=1)
+                print('seconds: '+str(1/webPollingRate))
+                print('scheduler: '+str(scheduler.get_job(id='logData')))
+            if recordingStatus == "TRUE":
+                dataLogging = True
+                scheduler.resume()
+            elif recordingStatus == "FALSE":
+                dataLogging = False
+                scheduler.pause()
+            else:
+                print("Unexpected Recording Status Returned")
+
+        return render_template("index.html", pollingRate=pollingRate)
+
+    @app.route('/data')             #send most recent DB entry to webpage
+    def data():         
+        time, lateral_acc, vertical_acc, vel, height = readDB()
+        gps_lat, gps_lon = gpsCoordinates()
+
+        return jsonify(
+            lateral_acc = lateral_acc[0],
+            vertical_acc = vertical_acc[0],
+            velocity = vel[0],
+            height = height[0],
+            time = time[0],
+            gps_lat = gps_lat,
+            gps_lon = gps_lon,
+            pollingRate = pollingRate
+            )
+
+    @app.route('/battery')          #json for battery status
+    def battery():
+        bat_percent, charge_status = batteryInfo()
+        return jsonify(
+            bat_percent = bat_percent,
+            charge_status = charge_status
         )
 
-@app.route('/chart')        #json for past database entries
-def chart():
-    time, lateral_acc, vertical_acc, vel, height = readDB()
-    return jsonify(
-        time = time,
-        lateral_acc = lateral_acc,
-        vertical_acc = vertical_acc,
-        velocity = vel,
-        height = height
-    )
+    @app.route('/onload_data')      #json for javascript initialization
+    def onload_data():
+        return jsonify(
+            recordingStatus = dataLogging
+        )
 
-@app.route('/download')     #csv export file download
-def download():
-    exportDB()
-    return send_file(exportPath + exportFile, as_attachment=True)
+    @app.route('/download')         #csv export file download
+    def download():
+        exportDB()
+        return send_file(exportPath + exportFile, as_attachment=True)
 
-@app.errorhandler(404)      #unknown path
-def page_not_found(e):
-    return redirect(url_for('index')), 404
+    @app.route('/cleardb', methods=['POST'])    #delete or clear database
+    def clearDB():
+        if request.method == 'POST':
+            if request.form['clear_confirmation']:
+                print("clearing database")
+                clearDatabase()
+            else:
+                print("database not cleared")
+        return ('', 204)
+    
+    @app.route('/shutdown', methods=['POST'])   #shutdown blackbox
+    def shutdown():
+        if request.method == 'POST':
+            if request.form['shutdown_confirmation']:
+                system(shutdownScript) 
+        return ('', 204)
 
+    @app.errorhandler(404)                      #unknown path
+    def page_not_found(e):
+        return redirect(url_for('index')), 404
 
-def toggleDataLogging():
-    dataLogging = not dataLogging
-
-#log data function
-def logData():
-    lateral_acc, vertical_acc, vel, height = dbData()                                   #get sensor data
-    currentTime = datetime.datetime.now()                                               #get current time
-    writeDB(currentTime.strftime(timeFormat), lateral_acc, vertical_acc, vel, height)   #log data
-
-#if webUI true, start webserver
-if webUI:
-    app.run(debug=True, port=webPort)
+    scheduler = APScheduler()
+    scheduler.init_app(app)
+    scheduler.start(paused=(not dataLogging))
+    scheduler.add_job(id='logData', func='main:logData', trigger='interval', seconds=(1/pollingRate), max_instances=1)
+    app.run(port=webPort)                       #start flask server
 
 #NEEDS LOGIC TO STOP RUNNING WHEN CONDITIONS ARE MET (PHYSICAL BUTTON START/STOP)
-#NEEDS LOGIC TO CHOOSE TO CLEAR DATABASE
 #NEEDS LOGIC TO SHUTDOWN WEBSITE
 #NEEDS OLED SCREEN CONTROL TO DISPLAY WEBPAGE/RECORDING STATUS
-#NEEDS LOGIC TO START/STOP DATA RECORDING
-

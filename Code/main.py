@@ -3,7 +3,7 @@ from flask_apscheduler import APScheduler
 import datetime
 from os import system
 from databaseInteract import writeDB, readDB, exportDB, exportFile, exportPath, clearDatabase
-from sensorRead import dbData, batteryInfo, gpsCoordinates
+from testsensorRead import dbData, batteryInfo, gpsCoordinates
 
 
 #global variables and defaults

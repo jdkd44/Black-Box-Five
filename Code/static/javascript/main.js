@@ -126,10 +126,11 @@ function updateGUI() {
     $.getJSON('/data', function(jsondata) {
       //Update Charts
       timeArray = jsondata.time.split(/-| |:|\./);
-      velChartData.push({x: new Date(timeArray[0], timeArray[1], timeArray[2], timeArray[3], timeArray[4], timeArray[5], timeArray[6]), y: jsondata.velocity });
-      vertAccChartData.push({x: new Date(timeArray[0], timeArray[1], timeArray[2], timeArray[3], timeArray[4], timeArray[5], timeArray[6]), y: jsondata.vertical_acc });
-      latAccChartData.push({x: new Date(timeArray[0], timeArray[1], timeArray[2], timeArray[3], timeArray[4], timeArray[5], timeArray[6]), y: jsondata.lateral_acc });
-      heightChartData.push({x: new Date(timeArray[0], timeArray[1], timeArray[2], timeArray[3], timeArray[4], timeArray[5], timeArray[6]), y: jsondata.height });
+      currentTime = new Date(timeArray[0], timeArray[1], timeArray[2], timeArray[3], timeArray[4], timeArray[5], timeArray[6])
+      velChartData.push({x: currentTime, y: jsondata.velocity });
+      vertAccChartData.push({x: currentTime, y: jsondata.vertical_acc });
+      latAccChartData.push({x: currentTime, y: jsondata.lateral_acc });
+      heightChartData.push({x: currentTime, y: jsondata.height });
       renderCharts();
 
       //Update Live Data Feed

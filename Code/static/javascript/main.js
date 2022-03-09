@@ -42,6 +42,12 @@ function clearDatabaseButtonClicked() {
   }
 }
 
+function shutdownButtonClicked() {
+  if(confirm('This will shut down the Black Box. Press OK to continue')) {
+    $.post("/shutdown", {shutdown_confirmation:true});
+  }
+}
+
 function pollingRateInputChanged() {
   webpageIndexPost();
 }

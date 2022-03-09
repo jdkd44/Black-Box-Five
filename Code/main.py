@@ -1,13 +1,15 @@
 from flask import Flask, render_template, jsonify, request, url_for, send_file, redirect
 from flask_apscheduler import APScheduler
+import datetime
+import os
 from databaseInteract import writeDB, readDB, exportDB, exportFile, exportPath, clearDatabase
 from sensorRead import dbData, batteryInfo, gpsCoordinates
-import datetime
 
 
 #global variables and defaults
 dataLogging = False                             #default dataLogging off
 timeFormat = "%Y-%m-%d %H:%M:%S.%f"             #formatting for time for database entries - YYYY-MM-DD HH:MM:SS.sss  
+shutdownScript = "shutdown /s"            #script used to turn device off
 pollingRate = 2                                 #times per second to poll the sensors, default 2
 webPort = 80                                    #port 80 for http requests
 
@@ -45,7 +47,7 @@ if __name__ == '__main__':
             recordingStatus = request.form['recordingStatus'].upper()
             webPollingRate = float(request.form['pollingRate'])
             if webPollingRate != pollingRate:
-                scheduler.modify_job(id='logData',jobstore=None,seconds=(1/pollingRate))
+                scheduler.modify_job('logData', seconds=(1/pollingRate))
             if recordingStatus == "TRUE":
                 dataLogging = True
                 scheduler.resume()
@@ -98,6 +100,13 @@ if __name__ == '__main__':
             if request.form['clear_confirmation']:
                 clearDatabase()
         return ('', 204)
+    
+    @app.route('/shutdown', methods=['POST'])   #shutdown blackbox
+    def shutdown():
+        if request.method == 'POST':
+            if request.form['shutdown_confirmation']:
+                os.system(shutdownScript)
+        return ('', 204)
 
     @app.errorhandler(404)          #unknown path
     def page_not_found(e):
@@ -111,4 +120,3 @@ if __name__ == '__main__':
 #NEEDS LOGIC TO STOP RUNNING WHEN CONDITIONS ARE MET (PHYSICAL BUTTON START/STOP)
 #NEEDS LOGIC TO SHUTDOWN WEBSITE
 #NEEDS OLED SCREEN CONTROL TO DISPLAY WEBPAGE/RECORDING STATUS
-#NEEDS LOGIC TO START/STOP DATA RECORDING

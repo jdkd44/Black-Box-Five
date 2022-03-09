@@ -24,19 +24,24 @@ def clearDatabase():
 
 #write data to database
 def writeDB(currentTime, lateral_acc, vertical_acc, vel, height):
+    logDB = "INSERT INTO sensor_data (entry_time, lateral_acceleration, vertical_acceleration, velocity, height) VALUES (?, ?, ?, ?, ?)"
     connection = sqlite3.connect(dbFolder + dbName)             #connect to database
     cur = connection.cursor()                                   #create cursor to move through database
-    with open(dbFolder + 'schema.sql') as f:                    #open database format file
-        connection.executescript(f.read())                      #create database tables if not existing
+    try:
+        with open(dbFolder + 'schema.sql') as f:                #open database format file
+            connection.executescript(f.read())                  #create database tables if not existing
+        cur.execute(logDB, (currentTime, lateral_acc, vertical_acc, vel, height))
+        connection.commit()                                     #commit database changes
+        connection.close()                                      #close database connection
+        return True                                             #return true if successful
+    except sqlite3.Error:
+        connection.close()                                      #close database connection
+        return False                                            #return false if theres an error
+    
 
-    #log data
-    cur.execute("INSERT INTO sensor_data (entry_time, lateral_acceleration, vertical_acceleration, velocity, height) VALUES (?, ?, ?, ?, ?)", (currentTime, lateral_acc, vertical_acc, vel, height))
-
-    connection.commit()                                         #commit database changes
-    connection.close()                                          #close database connection
 
 #read data from database
-def readDB(entries = 20):
+def readDB(entries = 1):
     connection = sqlite3.connect(dbFolder + dbName)             #connect to database
     cur = connection.cursor()                                   #create cursor to move through database
     exportScript = \

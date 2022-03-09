@@ -23,15 +23,14 @@ window.onload = function() {
 function recordButtonClicked() {
   recordingStatus = !recordingStatus;
   console.log("Recording: "+recordingStatus)
+  webpageIndexPost();
   if(recordingStatus) {
     clearCharts();
-    $.post( "/", {recordingStatus:recordingStatus});
     document.getElementById('recordButton').innerText = "Stop Recording";
     updateGUI();
     return true;
   }
   else {
-    $.post( "/", {recordingStatus:recordingStatus});
     document.getElementById('recordButton').innerText = "Start Recording";
     return false;
   }
@@ -39,8 +38,19 @@ function recordButtonClicked() {
 
 function clearDatabaseButtonClicked() {
   if(confirm('This will delete all data in the database. This is irreversable. Click "OK" to delete the data.')) {
-    $.post("/clearDB" {clear_confirmation:true})
+    $.post("/clearDB", {clear_confirmation:true});
   }
+}
+
+function pollingRateInputChanged() {
+  webpageIndexPost();
+}
+
+function webpageIndexPost() {
+  $.post( "/", {
+    pollingRate: document.getElementById('pollingInterval').value,
+    recordingStatus: recordingStatus
+  });
 }
 
 function initCharts() {
@@ -116,24 +126,24 @@ function updateGUI() {
     $.getJSON('/data', function(jsondata) {
       //Update Charts
       timeArray = jsondata.time.split(/-| |:|\./);
-      timeArray[6] = timeArray[6] % 1000;
       velChartData.push({x: new Date(timeArray[0], timeArray[1], timeArray[2], timeArray[3], timeArray[4], timeArray[5], timeArray[6]), y: jsondata.velocity });
       vertAccChartData.push({x: new Date(timeArray[0], timeArray[1], timeArray[2], timeArray[3], timeArray[4], timeArray[5], timeArray[6]), y: jsondata.vertical_acc });
       latAccChartData.push({x: new Date(timeArray[0], timeArray[1], timeArray[2], timeArray[3], timeArray[4], timeArray[5], timeArray[6]), y: jsondata.lateral_acc });
       heightChartData.push({x: new Date(timeArray[0], timeArray[1], timeArray[2], timeArray[3], timeArray[4], timeArray[5], timeArray[6]), y: jsondata.height });
       renderCharts();
 
-    //Update Live Data Feed
-    document.getElementById('liveVelocity').innerText = jsondata.velocity;
-    document.getElementById('liveHeight').innerText = jsondata.height;
-    document.getElementById('liveLatAcc').innerText = jsondata.lateral_acc;
-    document.getElementById('liveVertAcc').innerText = jsondata.vertical_acc;
-    document.getElementById('liveGPSLat').innerText = jsondata.gps_lat;
-    document.getElementById('liveGPSLon').innerText = jsondata.gps_lon;
-    document.getElementById('recordButton').innerText = "Stop Recording";
+      //Update Live Data Feed
+      document.getElementById('liveVelocity').innerText = jsondata.velocity;
+      document.getElementById('liveHeight').innerText = jsondata.height;
+      document.getElementById('liveLatAcc').innerText = jsondata.lateral_acc;
+      document.getElementById('liveVertAcc').innerText = jsondata.vertical_acc;
+      document.getElementById('liveGPSLat').innerText = jsondata.gps_lat;
+      document.getElementById('liveGPSLon').innerText = jsondata.gps_lon;
+      document.getElementById('recordButton').innerText = "Stop Recording";
+      document.getElementById('pollingInterval').value = jsondata.pollingRate;
 
-    setTimeout(function() {updateGUI()}, (1/parseFloat(document.getElementById('pollingInterval').value))*1000);
-  });
+      setTimeout(function() {updateGUI()}, (1/parseFloat(document.getElementById('pollingInterval').value))*1000);
+    });
   }
 }
 

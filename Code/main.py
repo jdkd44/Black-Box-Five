@@ -3,7 +3,7 @@ from flask_apscheduler import APScheduler
 import datetime
 from os import system
 from databaseInteract import writeDB, readDB, exportDB, exportFile, exportPath, clearDatabase
-from testsensorRead import dbData, batteryInfo, gpsCoordinates
+from testsensorRead import dbData, batteryInfo, gpsCoordinates, oledWrite
 
 
 #global variables and defaults
@@ -11,6 +11,7 @@ dataLogging = False                             #default dataLogging off
 timeFormat = "%Y-%m-%d %H:%M:%S.%f"             #formatting for time for database entries - YYYY-MM-DD HH:MM:SS.sss  
 shutdownScript = "sudo shutdown now"            #script used to turn device off
 pollingRate = 2                                 #times per second to poll the sensors, default 2
+oledUpdateInterval = 5                          #seconds between OLED display updates
 webPort = 80                                    #port 80 for http requests
 
 
@@ -24,6 +25,9 @@ def logData():                                  #get data and log it function
         print("Data has been logged")
     else:
         print("Error in database logging")
+
+def oledUpdate():
+    oledWrite(dataLogging)
     
 if __name__ == '__main__':
     app = Flask(__name__)                       #flask app intiation
@@ -41,20 +45,18 @@ if __name__ == '__main__':
                 pollingRate = webPollingRate
                 scheduler.remove_job(id='logData')
                 scheduler.add_job(id='logData', func='main:logData', trigger='interval', seconds=(1/webPollingRate), max_instances=1)
-                print('seconds: '+str(1/webPollingRate))
-                print('scheduler: '+str(scheduler.get_job(id='logData')))
             if recordingStatus == "TRUE":
                 dataLogging = True
-                scheduler.resume()
+                scheduler.resume_job('logData')
             elif recordingStatus == "FALSE":
                 dataLogging = False
-                scheduler.pause()
+                scheduler.pause_job('logData')
             else:
                 print("Unexpected Recording Status Returned")
 
         return render_template("index.html", pollingRate=pollingRate)
 
-    @app.route('/data')             #send most recent DB entry to webpage
+    @app.route('/data')                         #send most recent DB entry to webpage
     def data():         
         time, lateral_acc, vertical_acc, vel, height = readDB()
         gps_lat, gps_lon = gpsCoordinates()
@@ -70,7 +72,7 @@ if __name__ == '__main__':
             pollingRate = pollingRate
             )
 
-    @app.route('/battery')          #json for battery status
+    @app.route('/battery')                      #json for battery status
     def battery():
         bat_percent, charge_status = batteryInfo()
         return jsonify(
@@ -78,13 +80,13 @@ if __name__ == '__main__':
             charge_status = charge_status
         )
 
-    @app.route('/onload_data')      #json for javascript initialization
+    @app.route('/onload_data')                  #json for javascript initialization
     def onload_data():
         return jsonify(
             recordingStatus = dataLogging
         )
 
-    @app.route('/download')         #csv export file download
+    @app.route('/download')                     #csv export file download
     def download():
         exportDB()
         return send_file(exportPath + exportFile, as_attachment=True)
@@ -112,10 +114,11 @@ if __name__ == '__main__':
 
     scheduler = APScheduler()
     scheduler.init_app(app)
-    scheduler.start(paused=(not dataLogging))
+    scheduler.start()
     scheduler.add_job(id='logData', func='main:logData', trigger='interval', seconds=(1/pollingRate), max_instances=1)
+    scheduler.add_job(id='oledUpdate', func='main:oledUpdate', trigger='interval', seconds=oledUpdateInterval, max_instances=1)
+    if not dataLogging:
+        scheduler.pause_job('logData')
     app.run(port=webPort)                       #start flask server
 
 #NEEDS LOGIC TO STOP RUNNING WHEN CONDITIONS ARE MET (PHYSICAL BUTTON START/STOP)
-#NEEDS LOGIC TO SHUTDOWN WEBSITE
-#NEEDS OLED SCREEN CONTROL TO DISPLAY WEBPAGE/RECORDING STATUS

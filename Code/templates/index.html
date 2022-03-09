@@ -76,7 +76,7 @@
 <tr>
 <td style="padding-top:10px;padding-bottom:10px;">
 <div align="center" style="font-family:Arial, Helvetica Neue, Helvetica, sans-serif;text-align:center;"><div class="optionsPanel">
-  <p> Polling Rate (/s) <input type="text" id="pollingInterval" class="option" value=" {{pollingRate}} " onchange="pollingRateInputChanged()"></p>
+  <p> Polling Rate (/s) <input type="text" id="pollingInterval" class="option" value="{{pollingRate}}" onchange="pollingRateInputChanged()"></p>
   <br>
   <button type="button" id="recordButton" class="option" onclick="recordButtonClicked()"> Start Recording </button>
   <button type="button" id="exportButton" class="option" onclick="window.location.href='{{ url_for('download') }}'"> Export Database </button> <!-- Error showing in this line is fake, is just dealing with Flask formatting -->

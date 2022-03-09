@@ -13,14 +13,14 @@ exportPath = 'database/'
 
 #clear database
 def clearDatabase():
-
     remove_table = "DROP TABLE IF EXISTS sensor_data"           #SQLite statement to remove the existing table and it's data
-
     connection = sqlite3.connect(dbFolder + dbName)             #connect to database
     cur = connection.cursor()                                   #create cursor to move through database
     cur.execute(remove_table)                                   #remove table
+    cur.execute("VACUUM")                                       #remove leftover data
     connection.commit()                                         #commit database changes
     connection.close()                                          #close database connection
+    print("Database has been cleared")
 
 #write data to database
 def writeDB(currentTime, lateral_acc, vertical_acc, vel, height):

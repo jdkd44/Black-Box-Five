@@ -27,7 +27,7 @@ function recordButtonClicked() {
   if(recordingStatus) {
     clearCharts();
     document.getElementById('recordButton').innerText = "Stop Recording";
-    updateGUI();
+    setTimeout(function() {initCharts()}, (1/parseFloat(document.getElementById('pollingInterval').value))*1000);
     return true;
   }
   else {
@@ -38,8 +38,13 @@ function recordButtonClicked() {
 
 function clearDatabaseButtonClicked() {
   if(confirm('This will delete all data in the database. This is irreversable. Click "OK" to delete the data.')) {
-    $.post("/clearDB", {clear_confirmation:true});
+    $.post("/cleardb", {clear_confirmation:true});
+    setTimeout(function() {
+      clearCharts();
+      initCharts();
+    }, (1/parseFloat(document.getElementById('pollingInterval').value))*1000);
   }
+  
 }
 
 function shutdownButtonClicked() {
@@ -169,7 +174,6 @@ function renderCharts() {
   latAccChart.render();
   vertAccChart.render();
   heightChart.render();
-  console.log("renderCharts() ran")
 }
 
 function clearCharts() {

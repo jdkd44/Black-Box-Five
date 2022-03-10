@@ -5,7 +5,7 @@ from os import system
 from databaseInteract import writeDB, readDB, exportDB, exportFile, exportPath, clearDatabase
 from testsensorRead import dbData, batteryInfo, gpsCoordinates, oledWrite
 
-global dataLogging
+
 #global variables and defaults
 dataLogging = False                             #default dataLogging off
 timeFormat = "%Y-%m-%d %H:%M:%S.%f"             #formatting for time for database entries - YYYY-MM-DD HH:MM:SS.sss  
@@ -21,11 +21,10 @@ class Config(object):                           #flask scheduler configuration
 def logData():                                  #get data and log it function
     lateral_acc, vertical_acc, vel, height = dbData()
     currentTime = datetime.datetime.now().strftime(timeFormat)[0:23]
-    print(dataLogging)
-    # if writeDB(currentTime, lateral_acc, vertical_acc, vel, height):
-    #     print("Data has been logged")
-    # else:
-    #     print("Error in database logging")
+    if writeDB(currentTime, lateral_acc, vertical_acc, vel, height):
+        print("Data has been logged")
+    else:
+        print("Error in database logging")
 
 def oledUpdate():
     oledWrite(dataLogging)
@@ -38,6 +37,7 @@ if __name__ == '__main__':
     def index():
         if request.method == 'POST':            #if webpage posts data, get the data
             global pollingRate
+            global dataLogging
             recordingStatus = request.form['recordingStatus'].upper()
             webPollingRate = float(request.form['pollingRate'])
             if webPollingRate != pollingRate:

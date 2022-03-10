@@ -13,8 +13,11 @@ var heightChartData = [];
 
 //runs when window loads
 window.onload = function() {
-  $.getJSON('/onload_data', function(jsondata){
-    recordingStatus = jsondata.recordingStatus;
+  $.ajax({
+    url:'/onload_data',
+    async:false,
+    dataType:'json',
+    success: function(data) {recordingStatus=data.recordingStatus;}
   });
   getBattery();
   initCharts();

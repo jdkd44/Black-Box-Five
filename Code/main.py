@@ -5,13 +5,13 @@ from os import system
 from databaseInteract import writeDB, readDB, exportDB, exportFile, exportPath, clearDatabase
 from testsensorRead import dbData, batteryInfo, gpsCoordinates, oledWrite
 
-
+global dataLogging
 #global variables and defaults
 dataLogging = False                             #default dataLogging off
 timeFormat = "%Y-%m-%d %H:%M:%S.%f"             #formatting for time for database entries - YYYY-MM-DD HH:MM:SS.sss  
 shutdownScript = "sudo shutdown now"            #script used to turn device off
 pollingRate = 2                                 #times per second to poll the sensors, default 2
-oledUpdateInterval = 5                          #seconds between OLED display updates
+oledUpdateInterval = 1                          #seconds between OLED display updates
 webPort = 80                                    #port 80 for http requests
 
 
@@ -21,14 +21,15 @@ class Config(object):                           #flask scheduler configuration
 def logData():                                  #get data and log it function
     lateral_acc, vertical_acc, vel, height = dbData()
     currentTime = datetime.datetime.now().strftime(timeFormat)[0:23]
-    if writeDB(currentTime, lateral_acc, vertical_acc, vel, height):
-        print("Data has been logged")
-    else:
-        print("Error in database logging")
+    print(dataLogging)
+    # if writeDB(currentTime, lateral_acc, vertical_acc, vel, height):
+    #     print("Data has been logged")
+    # else:
+    #     print("Error in database logging")
 
 def oledUpdate():
     oledWrite(dataLogging)
-    
+
 if __name__ == '__main__':
     app = Flask(__name__)                       #flask app intiation
     app.config.from_object(Config())
@@ -36,9 +37,7 @@ if __name__ == '__main__':
     @app.route('/', methods = ['GET','POST'])   #main webpage
     def index():
         if request.method == 'POST':            #if webpage posts data, get the data
-            global dataLogging
             global pollingRate
-
             recordingStatus = request.form['recordingStatus'].upper()
             webPollingRate = float(request.form['pollingRate'])
             if webPollingRate != pollingRate:
@@ -47,9 +46,11 @@ if __name__ == '__main__':
                 scheduler.add_job(id='logData', func='main:logData', trigger='interval', seconds=(1/webPollingRate), max_instances=1)
             if recordingStatus == "TRUE":
                 dataLogging = True
+                #oledUpdate()
                 scheduler.resume_job('logData')
             elif recordingStatus == "FALSE":
                 dataLogging = False
+                #oledUpdate()
                 scheduler.pause_job('logData')
             else:
                 print("Unexpected Recording Status Returned")

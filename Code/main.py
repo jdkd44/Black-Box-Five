@@ -11,7 +11,7 @@ dataLogging = False                             #default dataLogging off
 timeFormat = "%Y-%m-%d %H:%M:%S.%f"             #formatting for time for database entries - YYYY-MM-DD HH:MM:SS.sss  
 shutdownScript = "sudo shutdown now"            #script used to turn device off
 pollingRate = 2                                 #times per second to poll the sensors, default 2
-oledUpdateInterval = 1                          #seconds between OLED display updates
+oledUpdateInterval = 30                         #seconds between OLED display updates
 webPort = 80                                    #port 80 for http requests
 
 
@@ -46,15 +46,13 @@ if __name__ == '__main__':
                 scheduler.add_job(id='logData', func='main:logData', trigger='interval', seconds=(1/webPollingRate), max_instances=1)
             if recordingStatus == "TRUE":
                 dataLogging = True
-                #oledUpdate()
                 scheduler.resume_job('logData')
             elif recordingStatus == "FALSE":
                 dataLogging = False
-                #oledUpdate()
                 scheduler.pause_job('logData')
             else:
                 print("Unexpected Recording Status Returned")
-
+            oledUpdate()
         return render_template("index.html", pollingRate=pollingRate)
 
     @app.route('/data')                         #send most recent DB entry to webpage
@@ -121,5 +119,3 @@ if __name__ == '__main__':
     if not dataLogging:
         scheduler.pause_job('logData')
     app.run(port=webPort)                       #start flask server
-
-#NEEDS LOGIC TO STOP RUNNING WHEN CONDITIONS ARE MET (PHYSICAL BUTTON START/STOP)

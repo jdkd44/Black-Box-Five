@@ -32,6 +32,9 @@ def dbData():
     lateral_acc = mpu.accel_x
     vertical_acc = mpu.accel_y
 
+    #convert speed in knots to mph
+    vel = (gps.speed_knots * 1.15078)
+
     #altitude in meters based on sea level pressure
     height = bmp.altitude 
 

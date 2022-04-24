@@ -12,7 +12,7 @@ timeFormat = "%Y-%m-%d %H:%M:%S.%f"             #formatting for time for databas
 shutdownScript = "sudo shutdown now"            #script used to turn device off
 pollingRate = 2                                 #times per second to poll the sensors, default 2
 oledUpdateInterval = 30                         #seconds between OLED display updates
-webPort = 80                                    #port 80 for http requests
+webPort = 8080                                  #port 80 for http requests
 
 
 class Config(object):                           #flask scheduler configuration
@@ -115,7 +115,7 @@ if __name__ == '__main__':
     scheduler.init_app(app)
     scheduler.start()
     scheduler.add_job(id='logData', func='main:logData', trigger='interval', seconds=(1/pollingRate), max_instances=1)
-    scheduler.add_job(id='oledUpdate', func='main:oledUpdate', trigger='interval', seconds=oledUpdateInterval, max_instances=1)
+#    scheduler.add_job(id='oledUpdate', func='main:oledUpdate', trigger='interval', seconds=oledUpdateInterval, max_instances=1)
     if not dataLogging:
         scheduler.pause_job('logData')
-    app.run(port=webPort)                       #start flask server
+    app.run(host="0.0.0.0",port=webPort)         #start flask server

@@ -115,7 +115,7 @@ if __name__ == '__main__':
     scheduler.init_app(app)
     scheduler.start()
     scheduler.add_job(id='logData', func='main:logData', trigger='interval', seconds=(1/pollingRate), max_instances=1)
-    scheduler.add_job(id='oledUpdate', func='main:oledUpdate', trigger='interval', seconds=oledUpdateInterval, max_instances=1)
+#    scheduler.add_job(id='oledUpdate', func='main:oledUpdate', trigger='interval', seconds=oledUpdateInterval, max_instances=1)
     if not dataLogging:
         scheduler.pause_job('logData')
     app.run(port=webPort)                       #start flask server

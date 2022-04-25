@@ -47,16 +47,10 @@ def dbData():
     return lateral_acc, vertical_acc, vel, height
 
 def gpsCoordinates():
-    gps_lat = gps.latitude
-    gps_lon = gps.longtidue
-
-    return gps_lat, gps_lon
+    return gps.latitude, gps.longitude
 
 def batteryInfo():
-    #TESTING ONLY
-    bat_percent = round(random() * 100,2)
-    charge_status = False
-    return bat_percent, charge_status 
+    return pisugar.get_battery_level(), pisugar.get_battery_power_plugged()
 
 def oledWrite(recordingStatus):
     if recordingStatus:                                 #get recording status

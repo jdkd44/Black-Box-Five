@@ -39,7 +39,8 @@ def dbData():
     vertical_acc = randint(dataMin, dataMax)
 
     #convert speed in knots to mph
-    vel = (gps.speed_knots * 1.15078)
+    if gps.speed_knots is not None: vel = (gps.speed_knots * 1.15078)
+    else: vel = "NULL"
 
     #altitude in meters based on sea level pressure
     height = bmp.altitude 
@@ -47,7 +48,8 @@ def dbData():
     return lateral_acc, vertical_acc, vel, height
 
 def gpsCoordinates():
-    return gps.latitude, gps.longitude
+    if (gps.latitude is not None) and (gps.longitude is not None): return gps.latitude, gps.longitude
+    else: return "NULL", "NULL"
 
 def batteryInfo():
     return pisugar.get_battery_level(), pisugar.get_battery_power_plugged()

@@ -24,13 +24,19 @@ def clearDatabase():
 
 #write data to database
 def writeDB(currentTime, lateral_acc, vertical_acc, vel, height):
-    logDB = "INSERT INTO sensor_data (entry_time, lateral_acceleration, vertical_acceleration, velocity, height) VALUES (?, ?, ?, ?, ?)"
+    logDB_all = "INSERT INTO sensor_data (entry_time, lateral_acceleration, vertical_acceleration, velocity, height) VALUES (?, ?, ?, ?, ?)"
+    logDB_no_vel = "INSERT INTO sensor_data (entry_time, lateral_acceleration, vertical_acceleration, height) VALUES (?, ?, ?, ?)"
     connection = sqlite3.connect(dbFolder + dbName)             #connect to database
     cur = connection.cursor()                                   #create cursor to move through database
     try:
         with open(dbFolder + 'schema.sql') as f:                #open database format file
             connection.executescript(f.read())                  #create database tables if not existing
-        cur.execute(logDB, (currentTime, lateral_acc, vertical_acc, vel, height))
+
+        if vel = "NULL":                                        #if there is velocity data (satellite has connection)
+            cur.execute(logDB_all, (currentTime, lateral_acc, vertical_acc, vel, height))
+        elif vel != "NULL":                                     #if there is not velocity data (satellite has no connection)
+            cur.execute(logDB_no_vel, (currentTime, lateral_acc, vertical_acc, height))
+
         connection.commit()                                     #commit database changes
         connection.close()                                      #close database connection
         return True                                             #return true if successful

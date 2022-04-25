@@ -6,6 +6,8 @@ import adafruit_bmp3xx
 import pisugar
 from random import random, randint
 
+from pisugar.pisugar import PiSugarServer
+
 dataMin = -3
 dataMax = 3
 
@@ -25,6 +27,8 @@ i2c = busio.I2C(board.SCL, board.SDA)
 bmp = adafruit_bmp3xx.BMP3XX_I2C(i2c)
 #mpu = adafruit_mpu6050.MPU6050(i2c)
 gps = adafruit_gps.GPS_GtopI2C(i2c, debug=False)
+
+batteryServer = pisugar.PiSugarServer("127.0.0.1")
 
 #Initialize GPS module by turning on GGA and RMC info
 gps.send_command(b"PMTK314,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0")
@@ -52,7 +56,7 @@ def gpsCoordinates():
     else: return "NULL", "NULL"
 
 def batteryInfo():
-    return pisugar.get_battery_level(), pisugar.get_battery_power_plugged()
+    return batteryServer.get_battery_level(), batteryServer.get_battery_power_plugged()
 
 def oledWrite(recordingStatus):
     if recordingStatus:                                 #get recording status

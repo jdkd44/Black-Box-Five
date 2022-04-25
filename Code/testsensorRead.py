@@ -3,6 +3,7 @@ import busio
 import adafruit_gps
 import adafruit_mpu6050
 import adafruit_bmp3xx
+import pisugar
 from random import random, randint
 
 dataMin = -3

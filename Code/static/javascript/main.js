@@ -47,7 +47,6 @@ function clearDatabaseButtonClicked() {
       initCharts();
     }, (1/parseFloat(document.getElementById('pollingInterval').value))*1000);
   }
-  
 }
 
 function shutdownButtonClicked() {
@@ -157,6 +156,9 @@ function updateGUI() {
       document.getElementById('recordButton').innerText = "Stop Recording";
       document.getElementById('pollingInterval').value = jsondata.pollingRate;
 
+      //Update Battery Info
+      getBattery();
+
       setTimeout(function() {updateGUI()}, (1/parseFloat(document.getElementById('pollingInterval').value))*1000);
     });
   }
@@ -165,8 +167,7 @@ function updateGUI() {
 function getBattery() {
   $.getJSON('/battery', function(jsonfile) {
     bat_percent = jsonfile.bat_percent.toString();
-    if(jsonfile.charge_status = true) {charge_status = "Charging"}
-    else {charge_status = "Discharging"}
+    charge_status = jsonfile.charge_status.toString();
     document.getElementById('batteryCharge').innerText = bat_percent + "%";
     document.getElementById('chargeStatus').innerText = charge_status;
   });

@@ -19,9 +19,9 @@ class Config(object):                           #flask scheduler configuration
     SCHEDULER_API_ENABLED = True
 
 def logData():                                  #get data and log it function
-    lateral_acc, vertical_acc, vel, height = dbData()
+    x_acc, y_acc, z_acc, vel, height = dbData()
     currentTime = datetime.datetime.now().strftime(timeFormat)[0:23]
-    if writeDB(currentTime, lateral_acc, vertical_acc, vel, height):
+    if writeDB(currentTime, x_acc, y_acc, z_acc, vel, height):
         print("Data has been logged")
     else:
         print("Error in database logging")
@@ -57,12 +57,12 @@ if __name__ == '__main__':
 
     @app.route('/data')                         #send most recent DB entry to webpage
     def data():         
-        time, lateral_acc, vertical_acc, vel, height = readDB()
+        time, x_acc, y_acc, z_acc, vel, height = readDB()
         gps_lat, gps_lon = gpsCoordinates()
-
+        lateral_acc = max(x_acc,y_acc)
         return jsonify(
-            lateral_acc = lateral_acc[0],
-            vertical_acc = vertical_acc[0],
+            lateral_acc = lateral_acc,
+            vertical_acc = z_acc[0],
             velocity = vel[0],
             height = height[0],
             time = time[0],

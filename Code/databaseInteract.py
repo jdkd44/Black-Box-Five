@@ -23,9 +23,9 @@ def clearDatabase():
     print("Database has been cleared")
 
 #write data to database
-def writeDB(currentTime, lateral_acc, vertical_acc, vel, height):
-    logDB_all = "INSERT INTO sensor_data (entry_time, lateral_acceleration, vertical_acceleration, velocity, height) VALUES (?, ?, ?, ?, ?)"
-    logDB_no_vel = "INSERT INTO sensor_data (entry_time, lateral_acceleration, vertical_acceleration, height) VALUES (?, ?, ?, ?)"
+def writeDB(currentTime, x_acc, y_acc, z_acc, vel, height):
+    logDB_all = "INSERT INTO sensor_data (entry_time, x_acceleration, y_acceleration, z_acceleration, velocity, height) VALUES (?, ?, ?, ?, ?, ?)"
+    logDB_no_vel = "INSERT INTO sensor_data (entry_time, x_acceleration, y_acceleration, z_acceleration, height) VALUES (?, ?, ?, ?, ?)"
     connection = sqlite3.connect(dbFolder + dbName)             #connect to database
     cur = connection.cursor()                                   #create cursor to move through database
     try:
@@ -33,10 +33,9 @@ def writeDB(currentTime, lateral_acc, vertical_acc, vel, height):
             connection.executescript(f.read())                  #create database tables if not existing
 
         if vel == "NULL":                                       #if there is velocity data (satellite has connection)
-            cur.execute(logDB_all, (currentTime, lateral_acc, vertical_acc, vel, height))
+            cur.execute(logDB_all, (currentTime, x_acc, y_acc, z_acc, vel, height))
         elif vel != "NULL":                                     #if there is not velocity data (satellite has no connection)
-            cur.execute(logDB_no_vel, (currentTime, lateral_acc, vertical_acc, height))
-
+            cur.execute(logDB_no_vel, (currentTime, x_acc, y_acc, z_acc, height))
         connection.commit()                                     #commit database changes
         connection.close()                                      #close database connection
         return True                                             #return true if successful
@@ -51,23 +50,24 @@ def readDB(entries = 1):
     connection = sqlite3.connect(dbFolder + dbName)             #connect to database
     cur = connection.cursor()                                   #create cursor to move through database
     exportScript = \
-        "SELECT entry_time, lateral_acceleration, vertical_acceleration, velocity, height FROM \
-         ( SELECT entry_time, lateral_acceleration, vertical_acceleration, velocity, height FROM sensor_data \
+        "SELECT entry_time, x_acceleration, y_acceleration, z_acceleration, velocity, height FROM \
+         ( SELECT entry_time, x_acceleration, y_acceleration, z_acceleration, velocity, height FROM sensor_data \
          ORDER BY entry_time DESC LIMIT " + str(entries) +") \
          ORDER BY entry_time ASC"
     cur.execute(exportScript)                                   #run the export script
     records = cur.fetchall()                                    #get export results
 
     time = [None for i in range(entries)]
-    lateral_acc = [None for i in range(entries)]
-    vertical_acc = [None for i in range(entries)]
+    x_acc = [None for i in range(entries)]
+    y_acc = [None for i in range(entries)]
+    z_acc = [None for i in range(entries)]
     vel = [None for i in range(entries)]
     height = [None for i in range(entries)]
 
     for entry, row in enumerate(records):                       #seperate everything into individual sections
-        time[entry], lateral_acc[entry], vertical_acc[entry], vel[entry], height[entry] = row
+        time[entry], x_acc[entry], y_acc[entry], z_acc[entry], vel[entry], height[entry] = row
 
-    return time, lateral_acc, vertical_acc, vel, height         #return results
+    return time, x_acc, y_acc, z_acc, vel, height         #return results
 
 #export database to csv file
 def exportDB():

@@ -59,7 +59,10 @@ if __name__ == '__main__':
     def data():         
         time, x_acc, y_acc, z_acc, vel, height = readDB()
         gps_lat, gps_lon = gpsCoordinates()
-        lateral_acc = max(x_acc,y_acc)
+
+        if x_acc > y_acc: lateral_acc = x_acc[0]
+        else: lateral_acc = y_acc[0]
+        
         return jsonify(
             lateral_acc = lateral_acc,
             vertical_acc = z_acc[0],

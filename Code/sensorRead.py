@@ -34,16 +34,16 @@ gps.send_command(b"PMTK220, 1000")
 
 #gather sensor data into one location
 def dbData():
-    #needs some form of logic to return the data that we want logged to database
-    acc = mpu.acceleration / 9.8        #get acceleration and convert to g's
-    x_acc = acc[1]
-    y_acc = acc[2]
-    z_acc = acc[3]
-    #convert speed in knots to mph
+    acc = mpu.acceleration  #get acceleration
+    x_acc = acc[0] / 9.8    #convert to G's
+    y_acc = acc[1] / 9.8
+    z_acc = (acc[2] + 9.8) / 9.8
+
     if gps.speed_knots is not None: vel = round(gps.speed_knots * 1.15078,3)
-    else: vel = "NULL"
-    #altitude in meters based on sea level pressure
-    height = bmp.altitude
+    else: vel = "NULL"      #get speed if GPS fix and convert to mph
+
+    height = bmp.altitude   #get altitude based on pressure
+
     return x_acc, y_acc, z_acc, vel, height
 
 def gpsCoordinates():

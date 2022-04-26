@@ -39,15 +39,12 @@ def dbData():
     x_acc = acc[1]
     y_acc = acc[2]
     z_acc = acc[3]
-    
     #convert speed in knots to mph
     if gps.speed_knots is not None: vel = round(gps.speed_knots * 1.15078,3)
     else: vel = "NULL"
-
     #altitude in meters based on sea level pressure
     height = bmp.altitude
-
-    return lateral_acc, vertical_acc, vel, height
+    return x_acc, y_acc, z_acc, vel, height
 
 def gpsCoordinates():
     if (gps.latitude is not None) and (gps.longitude is not None): return gps.latitude, gps.longitude

@@ -75,7 +75,7 @@ def exportDB():
     connection = sqlite3.connect(dbFolder + dbName)             #connect to database
     cur = connection.cursor()                                   #create cursor to move through database
     exportScript = \
-        "SELECT entry_time, lateral_acceleration, vertical_acceleration, velocity, height \
+        "SELECT entry_time, x_acceleration, y_acceleration, z_acceleration, velocity, height \
          FROM sensor_data \
          ORDER BY entry_time"
     cur.execute(exportScript)                                   #run the export script

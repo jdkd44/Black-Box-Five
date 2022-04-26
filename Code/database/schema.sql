@@ -3,8 +3,9 @@
 CREATE TABLE IF NOT EXISTS sensor_data (
     entryID INTEGER PRIMARY KEY,
     entry_time TEXT NOT NULL,
-    lateral_acceleration REAL,
-    vertical_acceleration REAL,
+    x_acceleration REAL,
+    y_acceleration REAL,
+    z_acceleration REAL,
     velocity REAL,
     height REAL 
 );

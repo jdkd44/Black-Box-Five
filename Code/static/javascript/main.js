@@ -135,6 +135,10 @@ function initCharts() {
 }
 
 function updateGUI() {
+
+    //Update GPS Info
+    getGPS();
+
   if(recordingStatus) {
     $.getJSON('/data', function(jsondata) {
       //Update Charts
@@ -153,13 +157,11 @@ function updateGUI() {
       document.getElementById('liveVertAcc').innerText = jsondata.vertical_acc;
       document.getElementById('recordButton').innerText = "Stop Recording";
       document.getElementById('pollingInterval').value = jsondata.pollingRate;
-
+      getBattery();
+      setTimeout(function() {updateGUI()}, (1/parseFloat(document.getElementById('pollingInterval').value))*1000);
     });
   }
-  //Update Battery Info
-  getBattery();
-  getGPS();
-  setTimeout(function() {updateGUI()}, (1/parseFloat(document.getElementById('pollingInterval').value))*1000);
+
 }
 
 function getBattery() {
@@ -173,21 +175,15 @@ function getBattery() {
 
 function getGPS() {
   $.getJSON('/gps', function(jsonfile) {
-    latitude = jsonfile.gps_lat;
-    longitude = jsonfile.gps_lon;
-    document.getElementById('liveGPSLat').innerText = latitude;
-    document.getElementById('liveGPSLon').innerText = longitude;
-    
-    if(jsonfile.fix){
-      console.log("GPS has fix:")
-      console.log("Latitude: " + latitude);
-      console.log("Longitude: " + longitude);
-    }
-    else {console.log("GPS searching for fix")}
-    console.log("Raw GPS Data: " + jsonfile.data);
+    document.getElementById('liveGPSLat').innerText = jsonfile.gps_lat;
+    document.getElementById('liveGPSLon').innerText = jsonfile.gps_lon;
+    console.log("GPS Fix: " + jsonfile.fix);
+    console.log("Latitude: " + jsonfile.gps_lat);
+    console.log("Longitude: " + jsonfile.gps_lon);
     console.log("\n\n")
-  });
-}
+    if(jsonfile.fix != "true") { setTimeout(function() {getGPS()}, 1000); };
+  })
+};
 
 function renderCharts() {
   velChart.render();

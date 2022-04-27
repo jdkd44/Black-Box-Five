@@ -27,33 +27,32 @@ conn, event_conn =  connect_tcp()
 batteryServer = PiSugarServer(conn,event_conn)
 
 #Initialize GPS module by turning on GGA and RMC info
-gps.send_command(b"PMTK314,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0")
+gps.send_command(b"PMTK314,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,1,0")
 
 #Set update rate to once a second
-gps.send_command(b"PMTK220, 500")
+gps.send_command(b"PMTK220, 1000")
 
 #gather sensor data into one location
 def dbData():
+    gps.update()
     acc = mpu.acceleration  #get acceleration
     x_acc = acc[0] / 9.8    #convert to G's
     y_acc = acc[1] / 9.8
     z_acc = (acc[2] + 9.8) / 9.8
+    
 
-    if gps.has_fix: vel = round(gps.speed_knots * 1.15078,3)
-    else: vel = "NULL"      #get speed if GPS fix and convert to mph
-
+    if gps.has_fix:
+        print(gps.speed_knots)
+        if gps.speed_knots is not None: vel = round(gps.speed_knots * 1.15078,3)
+        else: vel = "INVALID GPS DATA" 
+    else: vel = "NO GPS FIX"
     height = bmp.altitude   #get altitude based on pressure
 
     return x_acc, y_acc, z_acc, vel, height
 
 def gpsData():
-    data = gps.read(32)
-    data_str = "".join([chr(b) for b in data])
-    gps_lon = gps.longitude
-    gps_lat = gps.latitude
-    fix = gps.has_fix
-
-    return gps_lon, gps_lat, fix, data_str
+    gps.update()
+    return gps.longitude, gps.latitude, gps.has_fix
 
 def batteryInfo():
     if batteryServer.get_battery_power_plugged():

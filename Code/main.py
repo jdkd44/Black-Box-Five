@@ -4,6 +4,7 @@ import datetime
 from os import system
 from databaseInteract import writeDB, readDB, exportDB, exportFile, exportPath, clearDatabase
 from sensorRead import dbData, batteryInfo, gpsData, oledWrite
+from time import sleep
 
 
 #global variables and defaults
@@ -43,6 +44,7 @@ if __name__ == '__main__':
             if webPollingRate != pollingRate:
                 pollingRate = webPollingRate
                 scheduler.remove_job(id='logData')
+                sleep(2)
                 scheduler.add_job(id='logData', func='main:logData', trigger='interval', seconds=(1/webPollingRate), max_instances=1)
             if recordingStatus == "TRUE":
                 dataLogging = True
@@ -58,6 +60,8 @@ if __name__ == '__main__':
     @app.route('/data')                         #send most recent DB entry to webpage
     def data():         
         time, x_acc, y_acc, z_acc, vel, height = readDB()
+
+        x_acc[0], y_acc[0], z_acc[0], vel[0], height[0] = dbData()
 
         if x_acc > y_acc: lateral_acc = x_acc[0]
         else: lateral_acc = y_acc[0]
@@ -87,7 +91,7 @@ if __name__ == '__main__':
 
     @app.route('/gps')
     def gps():
-        longitude, latitude, fix, data  = gpsData()
+        longitude, latitude, fix = gpsData()
         if fix: 
             gps_lat = latitude
             gps_lon = longitude
@@ -97,8 +101,7 @@ if __name__ == '__main__':
         return jsonify(
             gps_lat = gps_lat,
             gps_lon = gps_lon,
-            fix = fix,
-            data = data
+            fix = fix
         )
 
     @app.route('/download')                     #csv export file download

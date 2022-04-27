@@ -151,17 +151,15 @@ function updateGUI() {
       document.getElementById('liveHeight').innerText = jsondata.height;
       document.getElementById('liveLatAcc').innerText = jsondata.lateral_acc;
       document.getElementById('liveVertAcc').innerText = jsondata.vertical_acc;
-      document.getElementById('liveGPSLat').innerText = jsondata.gps_lat;
-      document.getElementById('liveGPSLon').innerText = jsondata.gps_lon;
       document.getElementById('recordButton').innerText = "Stop Recording";
       document.getElementById('pollingInterval').value = jsondata.pollingRate;
 
-      //Update Battery Info
-      getBattery();
-
-      setTimeout(function() {updateGUI()}, (1/parseFloat(document.getElementById('pollingInterval').value))*1000);
     });
   }
+  //Update Battery Info
+  getBattery();
+  getGPS();
+  setTimeout(function() {updateGUI()}, (1/parseFloat(document.getElementById('pollingInterval').value))*1000);
 }
 
 function getBattery() {
@@ -170,6 +168,24 @@ function getBattery() {
     charge_status = jsonfile.charge_status.toString();
     document.getElementById('batteryCharge').innerText = bat_percent + "%";
     document.getElementById('chargeStatus').innerText = charge_status;
+  });
+}
+
+function getGPS() {
+  $.getJSON('/gps', function(jsonfile) {
+    latitude = jsonfile.gps_lat;
+    longitude = jsonfile.gps_lon;
+    document.getElementById('liveGPSLat').innerText = latitude;
+    document.getElementById('liveGPSLon').innerText = longitude;
+    
+    if(jsonfile.fix){
+      console.log("GPS has fix:")
+      console.log("Latitude: " + latitude);
+      console.log("Longitude: " + longitude);
+    }
+    else {console.log("GPS searching for fix")}
+    console.log("Raw GPS Data: " + jsonfile.data);
+    console.log("\n\n")
   });
 }
 

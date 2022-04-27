@@ -30,7 +30,7 @@ batteryServer = PiSugarServer(conn,event_conn)
 gps.send_command(b"PMTK314,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0")
 
 #Set update rate to once a second
-gps.send_command(b"PMTK220, 1000")
+gps.send_command(b"PMTK220, 500")
 
 #gather sensor data into one location
 def dbData():
@@ -39,16 +39,21 @@ def dbData():
     y_acc = acc[1] / 9.8
     z_acc = (acc[2] + 9.8) / 9.8
 
-    if gps.speed_knots is not None: vel = round(gps.speed_knots * 1.15078,3)
+    if gps.has_fix: vel = round(gps.speed_knots * 1.15078,3)
     else: vel = "NULL"      #get speed if GPS fix and convert to mph
 
     height = bmp.altitude   #get altitude based on pressure
 
     return x_acc, y_acc, z_acc, vel, height
 
-def gpsCoordinates():
-    if (gps.latitude is not None) and (gps.longitude is not None): return gps.latitude, gps.longitude
-    else: return "NULL", "NULL"
+def gpsData():
+    data = gps.read(32)
+    data_str = "".join([chr(b) for b in data])
+    gps_lon = gps.longitude
+    gps_lat = gps.latitude
+    fix = gps.has_fix
+
+    return gps_lon, gps_lat, fix, data_str
 
 def batteryInfo():
     if batteryServer.get_battery_power_plugged():

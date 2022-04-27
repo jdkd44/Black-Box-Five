@@ -3,7 +3,7 @@ from flask_apscheduler import APScheduler
 import datetime
 from os import system
 from databaseInteract import writeDB, readDB, exportDB, exportFile, exportPath, clearDatabase
-from sensorRead import dbData, batteryInfo, gpsCoordinates, oledWrite
+from sensorRead import dbData, batteryInfo, gpsData, oledWrite
 
 
 #global variables and defaults
@@ -58,7 +58,6 @@ if __name__ == '__main__':
     @app.route('/data')                         #send most recent DB entry to webpage
     def data():         
         time, x_acc, y_acc, z_acc, vel, height = readDB()
-        gps_lat, gps_lon = gpsCoordinates()
 
         if x_acc > y_acc: lateral_acc = x_acc[0]
         else: lateral_acc = y_acc[0]
@@ -69,8 +68,6 @@ if __name__ == '__main__':
             velocity = vel[0],
             height = height[0],
             time = time[0],
-            gps_lat = gps_lat,
-            gps_lon = gps_lon,
             pollingRate = pollingRate
             )
 
@@ -86,6 +83,22 @@ if __name__ == '__main__':
     def onload_data():
         return jsonify(
             recordingStatus = dataLogging
+        )
+
+    @app.route('/gps')
+    def gps():
+        longitude, latitude, fix, data  = gpsData()
+        if fix: 
+            gps_lat = latitude
+            gps_lon = longitude
+        else:
+            gps_lat = "NULL"
+            gps_lon = "NULL"
+        return jsonify(
+            gps_lat = gps_lat,
+            gps_lon = gps_lon,
+            fix = fix,
+            data = data
         )
 
     @app.route('/download')                     #csv export file download

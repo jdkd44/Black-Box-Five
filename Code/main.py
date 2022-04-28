@@ -61,8 +61,6 @@ if __name__ == '__main__':
     def data():         
         time, x_acc, y_acc, z_acc, vel, height = readDB()
 
-        x_acc[0], y_acc[0], z_acc[0], vel[0], height[0] = dbData()
-
         if x_acc > y_acc: lateral_acc = x_acc[0]
         else: lateral_acc = y_acc[0]
         

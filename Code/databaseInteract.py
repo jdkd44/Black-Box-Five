@@ -32,9 +32,9 @@ def writeDB(currentTime, x_acc, y_acc, z_acc, vel, height):
         with open(dbFolder + 'schema.sql') as f:                #open database format file
             connection.executescript(f.read())                  #create database tables if not existing
 
-        if vel == "NULL":                                       #if there is velocity data (satellite has connection)
+        if vel == "NO GPS FIX":                                       #if there is velocity data (satellite has connection)
             cur.execute(logDB_all, (currentTime, x_acc, y_acc, z_acc, vel, height))
-        elif vel != "NULL":                                     #if there is not velocity data (satellite has no connection)
+        elif vel != "NO GPS FIX":                                     #if there is not velocity data (satellite has no connection)
             cur.execute(logDB_no_vel, (currentTime, x_acc, y_acc, z_acc, height))
         connection.commit()                                     #commit database changes
         connection.close()                                      #close database connection

@@ -12,7 +12,7 @@ dataLogging = False                             #default dataLogging off
 timeFormat = "%Y-%m-%d %H:%M:%S.%f"             #formatting for time for database entries - YYYY-MM-DD HH:MM:SS.sss  
 shutdownScript = "sudo shutdown now"            #script used to turn device off
 pollingRate = 2                                 #times per second to poll the sensors, default 2
-oledUpdateInterval = 30                         #seconds between OLED display updates
+oledUpdateInterval = 5                          #seconds between OLED display updates
 webPort = 8080                                  #port 80 for http requests
 
 
@@ -21,28 +21,30 @@ class Config(object):                           #flask scheduler configuration
 
 def logData():                                  #get data and log it function
     x_acc, y_acc, z_acc, vel, height = dbData()
+    lon, lat, fix = gpsData()
     currentTime = datetime.datetime.now().strftime(timeFormat)[0:23]
-    if writeDB(currentTime, x_acc, y_acc, z_acc, vel, height):
+    if writeDB(currentTime, x_acc, y_acc, z_acc, vel, height, fix, lon, lat):
         print("Data has been logged")
     else:
         print("Error in database logging")
 
 def oledUpdate():
+    global dataLogging
     oledWrite(dataLogging)
 
 app = Flask(__name__)                           #flask app intiation
 app.config.from_object(Config())
 @app.route('/', methods = ['GET','POST'])       #main webpage
 def index():
+    global pollingRate
+    global dataLogging
     if request.method == 'POST':                #if webpage posts data, get the data
-        global pollingRate
-        global dataLogging
         recordingStatus = request.form['recordingStatus'].upper()
         webPollingRate = float(request.form['pollingRate'])
         if webPollingRate != pollingRate:
             pollingRate = webPollingRate
+            sleep(1/pollingRate +0.25)
             scheduler.remove_job(id='logData')
-            sleep(2)
             scheduler.add_job(id='logData', func='main:logData', trigger='interval', seconds=(1/webPollingRate), max_instances=1)
         if recordingStatus == "TRUE":
             dataLogging = True
@@ -57,14 +59,11 @@ def index():
 @app.route('/data')                             #send most recent DB entry to webpage
 def data():         
     time, x_acc, y_acc, z_acc, vel, height = readDB()
-    if x_acc > y_acc: lateral_acc = x_acc[0]
-    else: lateral_acc = y_acc[0]
-    
     return jsonify(
-        lateral_acc = lateral_acc,
-        vertical_acc = z_acc[0],
+        lateral_acc = round(x_acc, 3),
+        vertical_acc = round(z_acc[0], 3),
         velocity = vel[0],
-        height = height[0],
+        height = round(height[0], 3),
         time = time[0],
         pollingRate = pollingRate
         )
@@ -84,8 +83,8 @@ def onload_data():
 def gps():
     longitude, latitude, fix = gpsData()
     if fix: 
-        gps_lat = latitude
-        gps_lon = longitude
+        gps_lat = round(latitude, 3)
+        gps_lon = round(longitude, 3)
     else:
         gps_lat = "NULL"
         gps_lon = "NULL"

@@ -7,5 +7,7 @@ CREATE TABLE IF NOT EXISTS sensor_data (
     y_acceleration REAL,
     z_acceleration REAL,
     velocity REAL,
-    height REAL 
+    height REAL,
+    longitude REAL,
+    latitude REAL
 );

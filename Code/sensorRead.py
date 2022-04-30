@@ -43,7 +43,9 @@ def dbData():
 
     if gps.has_fix:
         print(gps.speed_knots)
-        if gps.speed_knots is not None: vel = round(gps.speed_knots * 1.15078,3)
+        if gps.speed_knots is not None: 
+            vel = round(gps.speed_knots * 1.15078,3)
+            print(vel)
         else: vel = "INVALID GPS DATA" 
     else: vel = "NO GPS FIX"
     height = bmp.altitude   #get altitude based on pressure

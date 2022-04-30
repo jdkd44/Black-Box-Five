@@ -23,25 +23,34 @@ def clearDatabase():
     print("Database has been cleared")
 
 #write data to database
-def writeDB(currentTime, x_acc, y_acc, z_acc, vel, height):
-    logDB_all = "INSERT INTO sensor_data (entry_time, x_acceleration, y_acceleration, z_acceleration, velocity, height) VALUES (?, ?, ?, ?, ?, ?)"
-    logDB_no_vel = "INSERT INTO sensor_data (entry_time, x_acceleration, y_acceleration, z_acceleration, height) VALUES (?, ?, ?, ?, ?)"
+def writeDB(currentTime, x_acc, y_acc, z_acc, vel, height, fix, lon = None, lat = None):
+    logDB_all = "INSERT INTO sensor_data (entry_time, x_acceleration, y_acceleration, z_acceleration, velocity, height, longitude, latitude) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+    logDB_no_vel = "INSERT INTO sensor_data (entry_time, x_acceleration, y_acceleration, z_acceleration, height, longitude, latitude) VALUES (?, ?, ?, ?, ?, ?, ?)"
+    checkCoordinates = "SELECT entry_time, latitude, longitude FROM sensor_data ORDER BY entry_time DESC LIMIT 1"
+    old_coords = [None,None,None]
     connection = sqlite3.connect(dbFolder + dbName)             #connect to database
     cur = connection.cursor()                                   #create cursor to move through database
-    try:
-        with open(dbFolder + 'schema.sql') as f:                #open database format file
-            connection.executescript(f.read())                  #create database tables if not existing
 
-        if vel == "NO GPS FIX":                                       #if there is velocity data (satellite has connection)
-            cur.execute(logDB_all, (currentTime, x_acc, y_acc, z_acc, vel, height))
-        elif vel != "NO GPS FIX":                                     #if there is not velocity data (satellite has no connection)
-            cur.execute(logDB_no_vel, (currentTime, x_acc, y_acc, z_acc, height))
-        connection.commit()                                     #commit database changes
-        connection.close()                                      #close database connection
-        return True                                             #return true if successful
+    try:
+       with open(dbFolder + 'schema.sql') as f:                #open database format file
+           connection.executescript(f.read())                  #create database tables if not existing
+       if fix:                                                 #if there is velocity data (satellite has connection)
+        #    cur.execute(checkCoordinates)
+        #    old_data = cur.fetchall()
+        #    old_time, old_lat, old_lon = enumerate(old_data[0])
+        #    if lat == old_lat and lon == old_lon:
+        #        vel = None
+        #        print("Coordinates didn't change since " + old_time)
+           cur.execute(logDB_all, (currentTime, x_acc, y_acc, z_acc, vel, height, lon, lat))
+       if not fix or vel == None:                              #if there is not velocity data (satellite has no connection)
+           print("no fix")
+           cur.execute(logDB_no_vel, (currentTime, x_acc, y_acc, z_acc, height, lon, lat))
+       connection.commit()                                     #commit database changes
+       connection.close()                                      #close database connection
+       return True                                             #return true if successful
     except sqlite3.Error:
-        connection.close()                                      #close database connection
-        return False                                            #return false if theres an error
+         connection.close()                                      #close database connection
+         return False                                            #return false if theres an error
     
 
 
@@ -67,7 +76,7 @@ def readDB(entries = 1):
     for entry, row in enumerate(records):                       #seperate everything into individual sections
         time[entry], x_acc[entry], y_acc[entry], z_acc[entry], vel[entry], height[entry] = row
 
-    return time, x_acc, y_acc, z_acc, vel, height         #return results
+    return time, x_acc, y_acc, z_acc, vel, height               #return results
 
 #export database to csv file
 def exportDB():

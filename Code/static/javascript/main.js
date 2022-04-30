@@ -181,8 +181,8 @@ function getGPS() {
     console.log("Latitude: " + jsonfile.gps_lat);
     console.log("Longitude: " + jsonfile.gps_lon);
     console.log("\n\n")
-    if(jsonfile.fix != "true") { setTimeout(function() {getGPS()}, 1000); };
-  })
+    if(!jsonfile.fix) { setTimeout(function() { getGPS(); }, 1000); };
+  });
 };
 
 function renderCharts() {

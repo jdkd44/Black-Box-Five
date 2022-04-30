@@ -71,7 +71,7 @@ def oledWrite(recordingStatus):
     else:
         recordingText = "Not Recording"
     bat_percent, charge_status = batteryInfo()          #get battery info
-    batteryText = "Battery: " + str(bat_percent) + "%" + charge_status
+    batteryText = "Battery: " + str(bat_percent) + "% | " + str(charge_status)
     text = recordingText + "\n" + batteryText           #compile full oled text
     print("Mock OLED Written data:")
     print(text)

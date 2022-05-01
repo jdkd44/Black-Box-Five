@@ -30,7 +30,7 @@ function recordButtonClicked() {
   if(recordingStatus) {
     clearCharts();
     document.getElementById('recordButton').innerText = "Stop Recording";
-    setTimeout(function() {initCharts()}, (1/parseFloat(document.getElementById('pollingInterval').value))*1000);
+    setTimeout(function() {initCharts()}, (1/parseFloat(document.getElementById('pollingInterval').value))*1000 + 250);
     return true;
   }
   else {

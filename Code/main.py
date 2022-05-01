@@ -60,10 +60,10 @@ def index():
 def data():         
     time, x_acc, y_acc, z_acc, vel, height = readDB()
     return jsonify(
-        lateral_acc = round(x_acc, 3),
-        vertical_acc = round(z_acc[0], 3),
+        lateral_acc = x_acc[0],
+        vertical_acc = z_acc[0],
         velocity = vel[0],
-        height = round(height[0], 3),
+        height = height[0],
         time = time[0],
         pollingRate = pollingRate
     )

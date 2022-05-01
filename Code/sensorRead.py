@@ -12,7 +12,7 @@ from pisugar import PiSugarServer, connect_tcp
 # #variables
 oledW = 128
 oledH = 64
-oledAddr = 0x78
+oledAddr = 0x3c
 
 #Creates I2C interface to communicate using pins
 i2c = busio.I2C(board.SCL, board.SDA)
@@ -35,28 +35,26 @@ gps.send_command(b"PMTK220, 1000")
 #gather sensor data into one location
 def dbData():
     gps.update()
-    acc = mpu.acceleration  #get acceleration
-    x_acc = acc[0] / 9.8    #convert to G's
-    y_acc = acc[1] / 9.8
-    z_acc = (acc[2] + 9.8) / 9.8
-    
-
-    if gps.has_fix:
+    acc = mpu.acceleration              #get acceleration
+    x_acc = round(acc[0] / 9.8, 3)      #convert to G's and round to 3 decimal points
+    y_acc = round(acc[1] / 9.8, 3)
+    z_acc = round((acc[2] + 9.8) / 9.8, 3)
+    if gps.has_fix:                     #get velocity if GPS has a fix
         print(gps.speed_knots)
         if gps.speed_knots is not None: 
             vel = round(gps.speed_knots * 1.15078,3)
             print(vel)
         else: vel = "INVALID GPS DATA" 
     else: vel = "NO GPS FIX"
-    height = bmp.altitude   #get altitude based on pressure
+    height = round(bmp.altitude * 3.28084, 3)   #get altitude based on pressure and ocnvert to ft
 
     return x_acc, y_acc, z_acc, vel, height
 
-def gpsData():
+def gpsData():                          #get gps data (lon, lat, and fix status)
     gps.update()
     return gps.longitude, gps.latitude, gps.has_fix
 
-def batteryInfo():
+def batteryInfo():                      #get battery info
     if batteryServer.get_battery_power_plugged():
         charge_status = "Charging"
     elif not batteryServer.get_battery_power_plugged():

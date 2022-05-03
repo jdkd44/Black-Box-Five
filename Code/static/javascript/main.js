@@ -21,6 +21,7 @@ window.onload = function() {
   });
   getBattery();
   initCharts();
+  alert("Do not look at this while operating a motor vehicle")
 }
 
 function recordButtonClicked() {
@@ -42,6 +43,10 @@ function recordButtonClicked() {
 function clearDatabaseButtonClicked() {
   if(confirm('This will delete all data in the database. This is irreversable. Click "OK" to delete the data.')) {
     $.post("/cleardb", {clear_confirmation:true});
+    document.getElementById('liveVelocity').innerText = "NULL";
+    document.getElementById('liveHeight').innerText = "NULL";
+    document.getElementById('liveLatAcc').innerText = "NULL";
+    document.getElementById('liveVertAcc').innerText = "NULL";
     setTimeout(function() {
       clearCharts();
       initCharts();

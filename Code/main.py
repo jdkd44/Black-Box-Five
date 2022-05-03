@@ -32,13 +32,13 @@ def oledUpdate():
     global dataLogging
     oledWrite(dataLogging)
 
-app = Flask(__name__)                       #flask app intiation
+app = Flask(__name__)                           #flask app intiation
 app.config.from_object(Config())
-@app.route('/', methods = ['GET','POST'])   #main webpage
+@app.route('/', methods = ['GET','POST'])       #main webpage
 def index():
     global pollingRate
     global dataLogging
-    if request.method == 'POST':            #if webpage posts data, get the data
+    if request.method == 'POST':                #if webpage posts data, get the data
         recordingStatus = request.form['recordingStatus'].upper()
         webPollingRate = float(request.form['pollingRate'])
         if webPollingRate != pollingRate:
@@ -56,7 +56,7 @@ def index():
             print("Unexpected Recording Status Returned")
         oledUpdate()
     return render_template("index.html", pollingRate=pollingRate)
-@app.route('/data')                         #send most recent DB entry to webpage
+@app.route('/data')                             #send most recent DB entry to webpage
 def data():         
     time, x_acc, y_acc, z_acc, vel, height = readDB()
     return jsonify(
@@ -66,15 +66,15 @@ def data():
         height = height[0],
         time = time[0],
         pollingRate = pollingRate
-    )
-@app.route('/battery')                      #json for battery status
+        )
+@app.route('/battery')                          #json for battery status
 def battery():
     bat_percent, charge_status = batteryInfo()
     return jsonify(
         bat_percent = bat_percent,
         charge_status = charge_status
     )
-@app.route('/onload_data')                  #json for javascript initialization
+@app.route('/onload_data')                      #json for javascript initialization
 def onload_data():
     return jsonify(
         recordingStatus = dataLogging
@@ -93,11 +93,11 @@ def gps():
         gps_lon = gps_lon,
         fix = fix
     )
-@app.route('/download')                     #csv export file download
+@app.route('/download')                         #csv export file download
 def download():
     exportDB()
     return send_file(exportPath + exportFile, as_attachment=True)
-@app.route('/cleardb', methods=['POST'])    #delete or clear database
+@app.route('/cleardb', methods=['POST'])        #delete or clear database
 def clearDB():
     if request.method == 'POST':
         if request.form['clear_confirmation']:
@@ -106,16 +106,18 @@ def clearDB():
         else:
             print("database not cleared")
     return ('', 204)
-@app.route('/shutdown', methods=['POST'])   #shutdown blackbox
+
+@app.route('/shutdown', methods=['POST'])       #shutdown blackbox
 def shutdown():
     if request.method == 'POST':
         if request.form['shutdown_confirmation']:
             system(shutdownScript) 
     return ('', 204)
-@app.errorhandler(404)                      #unknown path
+
+@app.errorhandler(404)                          #unknown path
 def page_not_found(e):
     return redirect(url_for('index')), 404
-    
+
 scheduler = APScheduler()
 scheduler.init_app(app)
 scheduler.start()

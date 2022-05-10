@@ -11,7 +11,7 @@ from time import sleep
 dataLogging = False                             #default dataLogging off
 timeFormat = "%Y-%m-%d %H:%M:%S.%f"             #formatting for time for database entries - YYYY-MM-DD HH:MM:SS.sss  
 shutdownScript = "sudo shutdown now"            #script used to turn device off
-pollingRate = 2                                 #times per second to poll the sensors, default 2
+pollingRate = 1                                 #times per second to poll the sensors, default 1
 oledUpdateInterval = 5                          #seconds between OLED display updates
 webPort = 8080                                  #port 80 for http requests
 
@@ -76,6 +76,7 @@ def battery():
     )
 @app.route('/onload_data')                  #json for javascript initialization
 def onload_data():
+    oledUpdate()
     return jsonify(
         recordingStatus = dataLogging
     )
@@ -121,9 +122,9 @@ scheduler.init_app(app)
 scheduler.start()
 scheduler.add_job(id='logData', func='main:logData', trigger='interval', seconds=(1/pollingRate), max_instances=1)
 #scheduler.add_job(id='oledUpdate', func='main:oledUpdate', trigger='interval', seconds=oledUpdateInterval, max_instances=1)
-
 if not dataLogging:
     scheduler.pause_job('logData')
-     
+oledUpdate()     
+
 if __name__ == '__main__':
     app.run(host="0.0.0.0",port=webPort)         #start flask server
